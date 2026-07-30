@@ -63,15 +63,27 @@ def uploadVehicleImage_VEHICLE_ADD():
             import cloudinary.uploader
             import io
 
-            if os.environ.get("CLOUDINARY_URL"):
-                cloudinary.config(secure=True)
-            else:
-                cloudinary.config(
-                    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-                    api_key=os.environ.get("CLOUDINARY_API_KEY"),
-                    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-                    secure=True
-                )
+            cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME")
+            api_key = os.environ.get("CLOUDINARY_API_KEY")
+            api_secret = os.environ.get("CLOUDINARY_API_SECRET")
+
+            cloudinary_url = os.environ.get("CLOUDINARY_URL")
+            if cloudinary_url and not (cloud_name and api_key and api_secret):
+                from urllib.parse import urlparse
+                parsed = urlparse(cloudinary_url)
+                api_key = parsed.username
+                api_secret = parsed.password
+                cloud_name = parsed.hostname
+
+            if not (cloud_name and api_key and api_secret):
+                return {"status": False, "data": {}, "msg": "Cloudinary credentials are not fully configured"}
+
+            cloudinary.config(
+                cloud_name=cloud_name,
+                api_key=api_key,
+                api_secret=api_secret,
+                secure=True
+            )
 
             upload_result = cloudinary.uploader.upload(
                 io.BytesIO(data),
