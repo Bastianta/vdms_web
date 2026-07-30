@@ -55,7 +55,7 @@ def uploadVehicleImage_VEHICLE_ADD():
     # (works on Vercel or anywhere), upload there instead. Everywhere else
     # (Render, a VPS, local dev without Cloudinary set up) keeps saving to
     # static/uploads/vehicles exactly as before.
-    use_cloudinary = os.environ.get("CLOUDINARY_CLOUD_NAME") and os.environ.get("CLOUDINARY_API_KEY") and os.environ.get("CLOUDINARY_API_SECRET")
+    use_cloudinary = os.environ.get("CLOUDINARY_URL") or (os.environ.get("CLOUDINARY_CLOUD_NAME") and os.environ.get("CLOUDINARY_API_KEY") and os.environ.get("CLOUDINARY_API_SECRET"))
 
     if use_cloudinary:
         try:
@@ -63,12 +63,15 @@ def uploadVehicleImage_VEHICLE_ADD():
             import cloudinary.uploader
             import io
 
-            cloudinary.config(
-                cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-                api_key=os.environ.get("CLOUDINARY_API_KEY"),
-                api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-                secure=True
-            )
+            if os.environ.get("CLOUDINARY_URL"):
+                cloudinary.config(secure=True)
+            else:
+                cloudinary.config(
+                    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+                    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+                    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+                    secure=True
+                )
 
             upload_result = cloudinary.uploader.upload(
                 io.BytesIO(data),
