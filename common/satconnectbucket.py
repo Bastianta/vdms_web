@@ -10,6 +10,8 @@ Configuration:
   SATBUCKET_DESTINATION_LOCAL_FOLDER
   SATBUCKET_FILE_EXTENSION
 """
+import json
+from google.oauth2 import service_account
 from google.cloud import storage
 # from globalVar import SATBUCKET_DESTINATION_LOCAL_FOLDER, SATBUCKET_FILE_EXTENSION
 import os
@@ -20,14 +22,19 @@ Log = Logger()
 
 class SatBucket() : 
     def __init__(self, bucket) :
-        try :
-            self.bucket_name = bucket
-            self.storage_client = storage.Client()
-            self.bucket = self.storage_client.bucket(self.bucket_name)
-            self.status = True
-        except Exception as error:
-            self.status = False
-            Log.error(f"[SATBUCKET] Fail to Connect Bucket | {error} | {sys.exc_info()} |")
+       try :
+           self.bucket_name = bucket
+           creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+           if creds_json:
+               credentials = service_account.Credentials.from_service_account_info(json.loads(creds_json))
+               self.storage_client = storage.Client(credentials=credentials, project=credentials.project_id)
+           else:
+               self.storage_client = storage.Client()
+           self.bucket = self.storage_client.bucket(self.bucket_name)
+           self.status = True
+       except Exception as error:
+           self.status = False
+           Log.error(f"[SATBUCKET] Fail to Connect Bucket | {error} | {sys.exc_info()} |")
 
     def getListObject(self, folder, filename):
         """
