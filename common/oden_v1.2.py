@@ -10,12 +10,17 @@ from flask_session import Session
 
 import globalVar
 
+import os
 app.config['PERMANENT_SESSION_LIFETIME'] = globalVar.TIME_EXPIRED_REDIS
 app.config['SESSION_COOKIE_NAME'] = 'CLIENT'
 app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_REDIS'] = redis.from_url(
-    url=f'redis://{globalVar.HOST_REDIS}:{globalVar.PORT_REDIS}',
-    password=globalVar.PASSWORD_REDIS)
+_REDIS_URL_ENV = os.environ.get("REDIS_URL")
+if _REDIS_URL_ENV:
+    app.config['SESSION_REDIS'] = redis.from_url(url=_REDIS_URL_ENV)
+else:
+    app.config['SESSION_REDIS'] = redis.from_url(
+        url=f'redis://{globalVar.HOST_REDIS}:{globalVar.PORT_REDIS}',
+        password=globalVar.PASSWORD_REDIS)
 
 Session(app)
 sso = SSO(app)
