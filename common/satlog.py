@@ -67,6 +67,7 @@ class Logger :
 
     def error(self, message):
         self.__logStruct(severity="ERROR", msg=message)
+        print(message)
 
     def critical(self, message):
         self.__logStruct(severity="CRITICAL", msg=message)
