@@ -43,8 +43,9 @@ class Logger :
                     "project_id": os.environ.get("GOOGLE_CLOUD_PROJECT"),
                     "version_id": os.environ.get("GAE_VERSION")})
         else :
-            Path(f"{os.getcwd()}/log").mkdir(parents=True, exist_ok=True)
-            self.__logger = f"{os.getcwd()}/log/{datetime.now().strftime('%Y-%m-%d')}.txt"
+            base_dir = "/tmp" if os.environ.get("VERCEL") else os.getcwd()
+            Path(f"{base_dir}/log").mkdir(parents=True, exist_ok=True)
+            self.__logger = f"{base_dir}/log/{datetime.now().strftime('%Y-%m-%d')}.txt"
 
     def __logStruct(self, severity, msg):
         if os.environ.get("GAE_ENV") == "standard":

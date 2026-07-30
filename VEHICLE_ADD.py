@@ -59,29 +59,24 @@ def uploadVehicleImage_VEHICLE_ADD():
 
     if use_gcs:
         try:
-            import json
-            from google.cloud import storage
-            from google.oauth2 import service_account
+            import io
+            import cloudinary
+            import cloudinary.uploader
 
-            bucket_name = os.environ.get("GCS_BUCKET_NAME") or getattr(globalVar, "DEFAULT_BUCKET", "")
-            if not bucket_name:
-                return {"status": False, "data": {}, "msg": "GCS_BUCKET_NAME env var is not set"}
+            cloudinary.config(
+                cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+                api_key=os.environ.get("CLOUDINARY_API_KEY"),
+                api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+                secure=True
+            )
 
-            creds_json = os.environ.get("GCP_SERVICE_ACCOUNT_JSON")
-            if creds_json:
-                info = json.loads(creds_json)
-                credentials = service_account.Credentials.from_service_account_info(info)
-                client = storage.Client(credentials=credentials, project=info.get("project_id"))
-            else:
-                # Falls back to GOOGLE_APPLICATION_CREDENTIALS file path if set
-                client = storage.Client()
+            result = cloudinary.uploader.upload(
+                io.BytesIO(data),
+                public_id="vehicles/{}".format(new_filename.rsplit(".", 1)[0]),
+                resource_type="image"
+            )
 
-            bucket = client.bucket(bucket_name)
-            blob = bucket.blob("vehicles/{}".format(new_filename))
-            blob.upload_from_string(data, content_type=mimetype or "image/jpeg")
-            blob.make_public()
-
-            return {"status": True, "data": {"path": blob.public_url}, "msg": ""}
+            return {"status": True, "data": {"path": result.get("secure_url")}, "msg": ""}
         except Exception as e:
             return {"status": False, "data": {}, "msg": "Failed to upload to storage: {}".format(str(e))}
 

@@ -36,7 +36,7 @@ if PRODUCTION == "N":
     PORT_REDIS = 6379
     PASSWORD_REDIS = ""
     TIME_EXPIRED_REDIS = 900
-    DEFAULT_BUCKET = "sat-oden-upload"
+    DEFAULT_BUCKET = "vdms-vehicle-images"
     SATBUCKET_DESTINATION_LOCAL_FOLDER = ""
     DEFAULT_LOCAL = "/home/juan"
     DB_NAME = 'vdmsdb'  # Must match alias in config/Connection2.cfg
@@ -49,7 +49,7 @@ elif PRODUCTION == "Y":
     PORT_REDIS = 6379
     PASSWORD_REDIS = None
     TIME_EXPIRED_REDIS = 900
-    DEFAULT_BUCKET = "sat-oden-upload"
+    DEFAULT_BUCKET = "vdms-vehicle-images"
     DEFAULT_LOCAL = "/home/juan"
     SATBUCKET_DESTINATION_LOCAL_FOLDER = ""
     DB_NAME = 'vdmsdb'
