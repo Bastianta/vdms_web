@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VDMS — Financial Overview</title>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{font-family:'Inter',sans-serif;box-sizing:border-box;margin:0;padding:0;}
+body{background:#060c1a;color:#e2e8f0;display:flex;height:100vh;overflow:hidden;}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:2px}
+
+/* ── Layout ── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;background:#060c1a;}
+
+/* ── Top bar ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 28px;border-bottom:1px solid rgba(255,255,255,.05);
+  background:rgba(6,12,26,.95);backdrop-filter:blur(12px);flex-shrink:0;
+}
+.topbar-title{font-size:17px;font-weight:700;color:#f1f5f9;letter-spacing:-.02em;}
+.topbar-sub{font-size:12px;color:rgba(148,163,184,.5);margin-top:2px;}
+.btn-export{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);
+  color:#a5b4fc;border-radius:9px;padding:8px 16px;
+  font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.01em;
+  transition:all .2s;
+}
+.btn-export:hover{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.4);}
+
+/* ── Scroll area ── */
+.scroll{flex:1;overflow-y:auto;padding:24px 28px 32px;}
+
+/* ── KPI grid ── */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;margin-bottom:24px;
+}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+
+.kpi{
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;padding:20px 22px;
+  position:relative;overflow:hidden;
+  transition:border-color .2s,transform .2s;
+}
+.kpi:hover{border-color:rgba(255,255,255,.12);transform:translateY(-1px);}
+.kpi::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  opacity:.5;border-radius:0 0 16px 16px;
+}
+.kpi-profit::after{background:linear-gradient(90deg,#6366f1,#8b5cf6);}
+.kpi-sell::after{background:linear-gradient(90deg,#10b981,#34d399);}
+.kpi-roi::after{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.kpi-rent::after{background:linear-gradient(90deg,#3b82f6,#60a5fa);}
+.kpi-asset::after{background:linear-gradient(90deg,#8b5cf6,#a78bfa);}
+.kpi-avail::after{background:linear-gradient(90deg,#10b981,#6ee7b7);}
+.kpi-sold::after{background:linear-gradient(90deg,#64748b,#94a3b8);}
+.kpi-rented::after{background:linear-gradient(90deg,#3b82f6,#93c5fd);}
+
+.kpi-icon{font-size:22px;margin-bottom:12px;display:block;}
+.kpi-lbl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(148,163,184,.55);margin-bottom:6px;}
+.kpi-val{font-size:20px;font-weight:800;color:#f8fafc;letter-spacing:-.02em;line-height:1;}
+.kpi-val-sm{font-size:16px;font-weight:700;}
+.kpi-sub{font-size:11px;color:rgba(148,163,184,.45);margin-top:6px;line-height:1.4;}
+.kpi-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;
+  margin-top:6px;
+}
+.badge-up{background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.2);}
+.badge-neutral{background:rgba(148,163,184,.1);color:#94a3b8;border:1px solid rgba(148,163,184,.15);}
+
+/* ── Main content grid ── */
+.content-grid{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  gap:20px;
+}
+
+/* ── Section cards ── */
+.section{
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;overflow:hidden;
+}
+.section-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.section-title{font-size:13px;font-weight:700;color:#e2e8f0;}
+.section-sub{font-size:11px;color:rgba(148,163,184,.5);margin-top:1px;}
+
+/* ── Chart ── */
+.chart-wrap{padding:20px 20px 16px;display:flex;align-items:flex-end;gap:6px;height:160px;}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar-stack{flex:1;width:100%;display:flex;align-items:flex-end;gap:2px;}
+.bar{flex:1;border-radius:3px 3px 0 0;min-height:2px;transition:height .5s cubic-bezier(.4,0,.2,1);}
+.bar:hover{filter:brightness(1.2);}
+.bar-s{background:linear-gradient(180deg,#10b981,#059669);}
+.bar-r{background:linear-gradient(180deg,#3b82f6,#2563eb);}
+.bar-lbl{font-size:8px;color:rgba(148,163,184,.4);text-align:center;white-space:nowrap;}
+
+.legend{display:flex;gap:14px;padding:12px 20px;border-top:1px solid rgba(255,255,255,.04);}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(148,163,184,.6);}
+.leg-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ── Pending panel ── */
+.pending-wrap{padding:16px;display:flex;flex-direction:column;gap:12px;}
+.pcard{border-radius:12px;padding:14px 16px;}
+.pcard-num{font-size:32px;font-weight:800;line-height:1;margin:4px 0;}
+.pcard-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+.pcard-sub{font-size:11px;margin-top:4px;opacity:.6;}
+.pcard-link{font-size:11px;margin-top:8px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:3px;}
+.pcard-link:hover{opacity:.8;}
+
+/* ── Transaction table ── */
+.tx-wrap{overflow-x:auto;}
+.tx-table{width:100%;border-collapse:collapse;}
+.tx-table th{
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(148,163,184,.4);padding:11px 20px;
+  border-bottom:1px solid rgba(255,255,255,.04);text-align:left;white-space:nowrap;
+}
+.tx-table td{padding:11px 20px;border-bottom:1px solid rgba(255,255,255,.03);font-size:13px;vertical-align:middle;}
+.tx-table tr:last-child td{border-bottom:none;}
+.tx-table tbody tr:hover td{background:rgba(255,255,255,.02);}
+.tx-badge{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.tx-sale{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.18);}
+.tx-rental{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.18);}
+
+/* ── Download menu ── */
+.dl-menu{
+  display:none;position:absolute;right:0;top:calc(100% + 8px);
+  background:#0d1629;border:1px solid rgba(99,102,241,.2);
+  border-radius:12px;min-width:210px;z-index:200;
+  overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);
+  padding:6px 0;
+}
+.dl-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:9px 16px;background:none;border:none;color:#cbd5e1;font-size:12px;cursor:pointer;transition:background .15s;font-family:'Inter',sans-serif;}
+.dl-item:hover{background:rgba(99,102,241,.12);color:#a5b4fc;}
+.dl-sep{height:1px;background:rgba(255,255,255,.05);margin:4px 0;}
+
+/* ── Skeleton ── */
+.skel{background:rgba(255,255,255,.05);border-radius:8px;animation:skpulse 1.5s ease-in-out infinite;}
+@keyframes skpulse{0%,100%{opacity:.4}50%{opacity:.8}}
+
+.swal2-container{z-index:9999!important;}
+/* ── Date banner ── */
+.date-banner{font-size:11px;color:rgba(148,163,184,.4);letter-spacing:.04em;}
+
+/* ── Charts row ── */
+.charts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px;}
+.chart-card{
+  background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;padding:20px;
+}
+.chart-card-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(148,163,184,.55);margin-bottom:16px;}
+.donut-wrap{display:flex;align-items:center;gap:18px;}
+.donut-legend{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;}
+.dl-row{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(148,163,184,.7);}
+.dl-row strong{color:#e2e8f0;font-size:12px;margin-left:auto;white-space:nowrap;}
+.dl-swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.donut-center{text-align:center;}
+.donut-center-val{font-size:18px;font-weight:800;color:#f8fafc;line-height:1;}
+.donut-center-lbl{font-size:9px;color:rgba(148,163,184,.5);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+
+/* ── Metric pills ── */
+.metric-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
+.metric-pill{
+  background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;padding:12px 16px;flex:1;min-width:140px;
+}
+.metric-pill-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(148,163,184,.45);margin-bottom:4px;}
+.metric-pill-val{font-size:15px;font-weight:700;color:#e2e8f0;letter-spacing:-.01em;}
+.metric-pill-sub{font-size:10px;color:rgba(148,163,184,.4);margin-top:2px;}
+
+</style>
+</head>
+<body>
+<script>window.VDMS_CONFIG={role:'[USER_ROLE]',name:'[USER_NAMA]',menuId:'DASHBOARD'};</script>
+[SIDEBAR]
+
+<div class="main">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Financial Overview</div>
+      <div class="topbar-sub">Net profit · Revenue · Asset value</div></div><div id="dateBanner" class="date-banner"></div
+    </div>
+    <div style="position:relative;">
+      <button class="btn-export" id="btnDownload" onclick="toggleDL()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export CSV
+      </button>
+      <div class="dl-menu" id="dlMenu">
+        <button class="dl-item" onclick="downloadCSV('all')"><span>📊</span> Full Report</button>
+        <button class="dl-item" onclick="downloadCSV('summary')"><span>💰</span> Financial Summary</button>
+        <div class="dl-sep"></div>
+        <button class="dl-item" onclick="downloadCSV('transactions')"><span>🧾</span> All Transactions</button>
+        <button class="dl-item" onclick="downloadCSV('monthly')"><span>📅</span> Monthly Breakdown</button>
+        <button class="dl-item" onclick="downloadCSV('vehicles')"><span>🚗</span> Vehicle Inventory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll area -->
+  <div class="scroll">
+
+    <!-- KPI Cards row 1 (profit + revenue) -->
+    <div class="kpi-grid" id="kpiCards">
+      <div class="kpi"><div class="skel" style="height:12px;width:80px;margin-bottom:14px;"></div><div class="skel" style="height:24px;width:140px;"></div></div>
+      <div class="kpi"><div class="skel" style="height:12px;width:80px;margin-bottom:14px;"></div><div class="skel" style="height:24px;width:120px;"></div></div>
+      <div class="kpi"><div class="skel" style="height:12px;width:80px;margin-bottom:14px;"></div><div class="skel" style="height:24px;width:100px;"></div></div>
+      <div class="kpi"><div class="skel" style="height:12px;width:80px;margin-bottom:14px;"></div><div class="skel" style="height:24px;width:110px;"></div></div>
+    </div>
+
+    <!-- Asset row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;" id="assetCards">
+      <div class="kpi"><div class="skel" style="height:12px;width:80px;margin-bottom:14px;"></div><div class="skel" style="height:22px;width:130px;"></div></div>
+      <div class="kpi"><div class="skel" style="height:12px;width:80px;margin-bottom:14px;"></div><div class="skel" style="height:22px;width:110px;"></div></div>
+      <div class="kpi"><div class="skel" style="height:12px;width:80px;margin-bottom:14px;"></div><div class="skel" style="height:22px;width:120px;"></div></div>
+    </div>
+
+
+    <!-- Metric pills row -->
+    <div class="metric-row" id="metricPills">
+      <div class="metric-pill"><div class="skel" style="height:10px;width:60px;margin-bottom:8px;"></div><div class="skel" style="height:18px;width:80px;"></div></div>
+      <div class="metric-pill"><div class="skel" style="height:10px;width:60px;margin-bottom:8px;"></div><div class="skel" style="height:18px;width:80px;"></div></div>
+      <div class="metric-pill"><div class="skel" style="height:10px;width:60px;margin-bottom:8px;"></div><div class="skel" style="height:18px;width:80px;"></div></div>
+      <div class="metric-pill"><div class="skel" style="height:10px;width:60px;margin-bottom:8px;"></div><div class="skel" style="height:18px;width:80px;"></div></div>
+    </div>
+
+    <!-- Pie charts row -->
+    <div class="charts-row" id="chartsRow">
+      <div class="chart-card"><div class="skel" style="height:120px;width:100%;border-radius:10px;"></div></div>
+      <div class="chart-card"><div class="skel" style="height:120px;width:100%;border-radius:10px;"></div></div>
+      <div class="chart-card"><div class="skel" style="height:120px;width:100%;border-radius:10px;"></div></div>
+    </div>
+
+    <!-- Chart + Pending -->
+    <div class="content-grid" style="margin-bottom:24px;">
+      <div class="section">
+        <div class="section-hdr">
+          <div>
+            <div class="section-title">Monthly Revenue</div>
+            <div class="section-sub">Last 12 months</div>
+          </div>
+        </div>
+        <div id="chartArea" class="chart-wrap">
+          <div class="skel" style="width:100%;height:110px;border-radius:10px;"></div>
+        </div>
+        <div class="legend">
+          <div class="leg"><div class="leg-dot" style="background:#10b981;"></div>Sales</div>
+          <div class="leg"><div class="leg-dot" style="background:#3b82f6;"></div>Rentals</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-hdr">
+          <div class="section-title">Pending Actions</div>
+        </div>
+        <div class="pending-wrap" id="pendingPanel">
+          <div class="skel" style="height:80px;border-radius:12px;"></div>
+          <div class="skel" style="height:80px;border-radius:12px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="section">
+      <div class="section-hdr">
+        <div>
+          <div class="section-title">Recent Completed Transactions</div>
+          <div class="section-sub">Latest sales and rentals</div>
+        </div>
+      </div>
+      <div class="tx-wrap">
+        <table class="tx-table">
+          <thead><tr>
+            <th>Type</th><th>Customer</th><th>Vehicle</th><th>Amount</th><th>Date</th>
+          </tr></thead>
+          <tbody id="txBody">
+            <tr><td colspan="5" style="text-align:center;padding:32px;color:rgba(148,163,184,.3)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /scroll -->
+</div><!-- /main -->
+
+<script>
+var menuId='DASHBOARD';
+function callAPI(fn,data){
+  return $.ajax({url:'/',type:'POST',contentType:'application/json',
+    data:JSON.stringify({type:'API',menuId:menuId,data:data||{},apiName:fn}),dataType:'json'});
+}
+
+// Format number compactly: 7.016.200.000 → "Rp 7,0 M" or "Rp 701 Jt"
+function rpShort_REMOVED(v){
+  var n=Math.round(parseFloat(String(v||'0').replace(/[^0-9.]/g,''))||0);
+  if(n>=1000000000) return 'Rp '+(n/1000000000).toFixed(1).replace('.',',')+' M';
+  if(n>=1000000)    return 'Rp '+(n/1000000).toFixed(0)+' Jt';
+  if(n>=1000)       return 'Rp '+(n/1000).toFixed(0)+' Rb';
+  return 'Rp '+n.toLocaleString('id-ID');
+}
+function rpFull(v){
+  var n=Math.round(parseFloat(String(v||'0').replace(/[^0-9.]/g,''))||0);
+  return 'Rp '+n.toLocaleString('id-ID');
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+if(!window.VDMS_CONFIG||window.VDMS_CONFIG.role!=='admin'){
+  document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#f87171;font-size:15px">Access denied. Admin only.</div>';
+}
+
+function loadAll(){ loadSummary(); loadMonthly(); loadRecent(); loadPending(); }
+
+/* ── KPI Cards ── */
+function loadSummary(){
+  callAPI('getFinancialSummary_DASHBOARD',{}).done(function(r){
+    if(!r||!r.status) return;
+    var d=r.data;
+    var sellP=parseFloat(d.sell_profit||d.total_profit||0);
+    var rentP=parseFloat(d.rental_revenue||0);
+    var sellR=parseFloat(d.sell_revenue||0);
+    var sellC=parseFloat(d.sell_cost||0);
+    var totalP=sellP+rentP;
+    var roi=sellC>0?((sellP/sellC)*100).toFixed(1):0;
+
+    // Row 1: profit & revenue
+    var row1=[
+      {cls:'kpi-profit',icon:'💰',lbl:'Net Profit',val:rpFull(totalP),sub:rpFull(totalP),badge:null},
+      {cls:'kpi-sell',  icon:'🚗',lbl:'Sales Revenue',val:rpFull(sellR),sub:d.sell_count+' completed sales',badge:null},
+      {cls:'kpi-roi',   icon:'📈',lbl:'Sales Profit',val:rpFull(sellP),sub:'ROI '+roi+'% · Cost '+rpFull(sellC),badge:roi>0?{cls:'badge-up',txt:'↑ '+roi+'%'}:null},
+      {cls:'kpi-rent',  icon:'📅',lbl:'Rental Revenue',val:rpFull(rentP),sub:d.rental_count+' completed rentals',badge:null},
+    ];
+    var h1='';
+    row1.forEach(function(c){
+      h1+='<div class="kpi '+c.cls+'">'
+        +'<span class="kpi-icon">'+c.icon+'</span>'
+        +'<div class="kpi-lbl">'+c.lbl+'</div>'
+        +'<div class="kpi-val" title="'+rpFull(parseFloat(c.val.replace(/[^0-9]/g,'')))+'">'+c.val+'</div>'
+        +(c.badge?'<span class="kpi-badge '+c.badge.cls+'">'+c.badge.txt+'</span>':'')
+        +'<div class="kpi-sub">'+c.sub+'</div>'
+        +'</div>';
+    });
+    $('#kpiCards').html(h1);
+
+    // Row 2: asset cards
+    var assetTotal=parseFloat(d.asset_total||0);
+    var assetAvail=parseFloat(d.asset_available||0);
+    var assetPct=assetTotal>0?Math.round(assetAvail/assetTotal*100):0;
+    var row2=[
+      {cls:'kpi-asset', icon:'🏦',lbl:'Total Asset Value',    val:rpFull(d.asset_total),    sub:d.vehicle_count+' vehicles total'},
+      {cls:'kpi-avail', icon:'✅',lbl:'Available Inventory',  val:rpFull(d.asset_available), sub:d.available_count+' vehicles · '+assetPct+'% of fleet'},
+      {cls:'kpi-sold',  icon:'📦',lbl:'Sold · Rented',        val:d.sold_count+' / '+d.rented_count, sub:'Sold '+rpFull(d.asset_sold_book)+' book value'},
+    ];
+    var h2='';
+    row2.forEach(function(c){
+      h2+='<div class="kpi '+c.cls+'">'
+        +'<span class="kpi-icon">'+c.icon+'</span>'
+        +'<div class="kpi-lbl">'+c.lbl+'</div>'
+        +'<div class="kpi-val kpi-val-sm">'+c.val+'</div>'
+        +'<div class="kpi-sub">'+c.sub+'</div>'
+        +'</div>';
+    });
+    $('#assetCards').html(h2);
+  });
+}
+
+/* ── Monthly chart ── */
+function loadMonthly(){
+  callAPI('getMonthlyBreakdown_DASHBOARD',{}).done(function(r){
+    if(!r||!r.status||!r.data.length){$('#chartArea').html('<div style="color:rgba(148,163,184,.3);padding:16px;font-size:13px">No data available</div>');return;}
+    var rows=r.data, maxVal=1;
+    rows.forEach(function(row){ var t=parseFloat(row.totalrev||0); if(t>maxVal)maxVal=t; });
+    var html='';
+    rows.forEach(function(row){
+      var sh=Math.max(3,Math.round((parseFloat(row.sellrev||0)/maxVal)*110));
+      var rh=Math.max(3,Math.round((parseFloat(row.rentalrev||0)/maxVal)*110));
+      var total=parseFloat(row.totalrev||0);
+      html+='<div class="bar-group" title="'+esc(row.month)+'\nSales: '+rpFull(row.sellrev)+'\nRental: '+rpFull(row.rentalrev)+'">'
+        +'<div class="bar-stack">'
+        +'<div class="bar bar-s" style="height:'+sh+'px"></div>'
+        +'<div class="bar bar-r" style="height:'+rh+'px"></div>'
+        +'</div>'
+        +'<div class="bar-lbl">'+esc((row.month||'').split(' ')[0])+'</div>'
+        +'</div>';
+    });
+    $('#chartArea').html(html);
+  });
+}
+
+/* ── Recent transactions ── */
+function loadRecent(){
+  callAPI('getRecentTransactions_DASHBOARD',{}).done(function(r){
+    if(!r||!r.status||!r.data.length){
+      $('#txBody').html('<tr><td colspan="5" style="text-align:center;padding:32px;color:rgba(148,163,184,.3)">No completed transactions yet</td></tr>');
+      return;
+    }
+    var html='';
+    r.data.forEach(function(tx){
+      var badge=tx.txtype==='sale'
+        ?'<span class="tx-badge tx-sale">Sale</span>'
+        :'<span class="tx-badge tx-rental">Rental</span>';
+      html+='<tr>'
+        +'<td>'+badge+'</td>'
+        +'<td style="color:#e2e8f0;font-weight:500">'+esc(tx.custname)+'</td>'
+        +'<td style="color:rgba(148,163,184,.65)">'+esc(tx.vehicle)+'</td>'
+        +'<td style="font-weight:700;color:#a5b4fc;font-variant-numeric:tabular-nums">'+rpFull(tx.amount)+'</td>'
+        +'<td style="color:rgba(148,163,184,.45);font-size:12px;font-variant-numeric:tabular-nums">'+esc(tx.txdate)+'</td>'
+        +'</tr>';
+    });
+    $('#txBody').html(html);
+  });
+}
+
+/* ── Pending panel ── */
+function loadPending(){
+  callAPI('getPendingTransactions_DASHBOARD',{}).done(function(r){
+    if(!r||!r.status){$('#pendingPanel').html('<div style="color:#f87171;padding:8px;font-size:13px">Error loading</div>');return;}
+    var d=r.data;
+    var ps=parseInt(d.pendingsales||0);
+    var ar=parseInt(d.activerentals||0);
+    var html=''
+      +'<div class="pcard" style="background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.18);">'
+      +'<div class="pcard-lbl" style="color:#fbbf24;">Pending Sales</div>'
+      +'<div class="pcard-num" style="color:#fde047;">'+ps+'</div>'
+      +'<div class="pcard-sub" style="color:rgba(251,191,36,.6);">awaiting deposit / completion</div>'
+      +'<a href="/?type=CUSTOM_VIEW&menuId=PURCHASE" class="pcard-link" style="color:#fbbf24;">View purchases <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>'
+      +'</div>'
+      +'<div class="pcard" style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);">'
+      +'<div class="pcard-lbl" style="color:#60a5fa;">Active Rentals</div>'
+      +'<div class="pcard-num" style="color:#93c5fd;">'+ar+'</div>'
+      +'<div class="pcard-sub" style="color:rgba(96,165,250,.6);">pending · confirmed · ongoing</div>'
+      +'<a href="/?type=CUSTOM_VIEW&menuId=RENTAL" class="pcard-link" style="color:#60a5fa;">View rentals <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>'
+      +'</div>';
+    $('#pendingPanel').html(html);
+  });
+}
+
+/* ── CSV Export ── */
+function toggleDL(){
+  var m=document.getElementById('dlMenu');
+  m.style.display=m.style.display==='none'||!m.style.display?'block':'none';
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#btnDownload')&&!e.target.closest('#dlMenu')){
+    var m=document.getElementById('dlMenu');
+    if(m) m.style.display='none';
+  }
+});
+function downloadCSV(type){
+  document.getElementById('dlMenu').style.display='none';
+  var labels={all:'VDMS_Full_Report',summary:'VDMS_Summary',transactions:'VDMS_Transactions',monthly:'VDMS_Monthly',vehicles:'VDMS_Inventory'};
+  var fn=(labels[type]||'VDMS_Export')+'_'+(new Date().toISOString().slice(0,10))+'.csv';
+  var toast=Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:0});
+  toast.fire({icon:'info',title:'Preparing…'});
+  var fetches={};
+  if(type==='all'||type==='summary')     fetches.summary=callAPI('getFinancialSummary_DASHBOARD',{});
+  if(type==='all'||type==='monthly')     fetches.monthly=callAPI('getMonthlyBreakdown_DASHBOARD',{});
+  if(type==='all'||type==='transactions')fetches.txns=callAPI('getRecentTransactions_DASHBOARD',{});
+  if(type==='all'||type==='vehicles')    fetches.vehicles=$.ajax({url:'/',type:'POST',contentType:'application/json',data:JSON.stringify({type:'API',menuId:'VEHICLE_LIST',data:{search:'',brand:'',type:'',availability:'',sortcol:'',sortdir:'asc',gridmode:true},apiName:'getGroupedVehicles_VEHICLE_LIST'}),dataType:'json'});
+  var keys=Object.keys(fetches),res={},done=0;
+  if(!keys.length){toast.close();return;}
+  function tryBuild(){if(++done===keys.length){toast.close();triggerDL('\uFEFF'+buildCSV(type,res),fn);Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:2000}).fire({icon:'success',title:fn});}}
+  keys.forEach(function(k){fetches[k].done(function(r){res[k]=r&&r.status?r.data:null;}).fail(function(){res[k]=null;}).always(tryBuild);});
+}
+function ec(v){v=String(v==null?'':v);return(v.indexOf(',')>=0||v.indexOf('"')>=0||v.indexOf('\n')>=0)?'"'+v.replace(/"/g,'""')+'"':v;}
+function row(a){return a.map(ec).join(',')+'\r\n';}
+function buildCSV(type,d){
+  var out='';
+  if(type==='all'||type==='summary'){
+    out+='=== FINANCIAL SUMMARY ===\r\n';
+    if(d.summary){var s=d.summary;out+=row(['Net Profit',s.total_profit])+row(['Sales Revenue',s.sell_revenue])+row(['Sales Cost',s.sell_cost||0])+row(['Rental Revenue',s.rental_revenue])+row(['Total Vehicles',s.vehicle_count])+row(['Available',s.available_count])+row(['Rented',s.rented_count])+row(['Sold',s.sold_count]);}
+    out+='\r\n';
+  }
+  if(type==='all'||type==='monthly'){
+    out+='=== MONTHLY (Last 12 Months) ===\r\n'+row(['Month','Sales (Rp)','Rental (Rp)','Total (Rp)']);
+    if(d.monthly)d.monthly.forEach(function(m){out+=row([m.month,m.sellrev,m.rentalrev,m.totalrev]);});
+    out+='\r\n';
+  }
+  if(type==='all'||type==='transactions'){
+    out+='=== TRANSACTIONS ===\r\n'+row(['Type','Customer','Vehicle','Amount','Date']);
+    if(d.txns)d.txns.forEach(function(t){out+=row([t.txtype,t.custname,t.vehicle,t.amount,t.txdate]);});
+    out+='\r\n';
+  }
+  if(type==='all'||type==='vehicles'){
+    out+='=== INVENTORY ===\r\n'+row(['Brand','Model','Trim','Year','Type','Condition','Price','Cost','Status']);
+    if(d.vehicles&&d.vehicles.groups)d.vehicles.groups.forEach(function(g){g.units.forEach(function(u){out+=row([u.vehiclebrand,u.vehiclename,u.vehicletrim,u.vehicleyear,u.vehicletype,u.vehicleisnew==='true'?'New':'Used',u.vehicleprice,u.vehiclecostprice||0,u.vehiclestatus]);});});
+  }
+  return out;
+}
+function triggerDL(csv,fn){var b=new Blob([csv],{type:'text/csv;charset=utf-8;'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fn;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u);},500);}
+
+
+/* ── Date stamp ── */
+(function(){
+  var el=document.getElementById('dateBanner');
+  if(el){var d=new Date();el.textContent=d.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+})();
+
+/* ── SVG Donut chart helper ── */
+function svgDonut(slices, cx, cy, r, stroke){
+  // slices: [{val, color, label}]
+  var total=slices.reduce(function(s,x){return s+x.val;},0);
+  if(total===0) return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="'+stroke+'"/>';
+  var out='', offset=0, circ=2*Math.PI*r;
+  slices.forEach(function(s){
+    var pct=s.val/total;
+    var dash=pct*circ;
+    var gap=circ-dash;
+    var rotate=-90+offset*360;
+    out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'"'
+      +' fill="none" stroke="'+s.color+'" stroke-width="'+stroke+'"'
+      +' stroke-dasharray="'+dash.toFixed(2)+' '+gap.toFixed(2)+'"'
+      +' stroke-dashoffset="0"'
+      +' transform="rotate('+rotate.toFixed(2)+' '+cx+' '+cy+')"'
+      +' style="transition:stroke-dasharray .6s ease">'
+      +'<title>'+esc(s.label)+': '+s.val+'</title>'
+      +'</circle>';
+    offset+=pct;
+  });
+  return out;
+}
+
+/* ── Fleet status pie ── */
+function drawFleetPie(d){
+  var avail=parseInt(d.available_count||0);
+  var rented=parseInt(d.rented_count||0);
+  var sold=parseInt(d.sold_count||0);
+  var total=avail+rented+sold;
+  var slices=[
+    {val:avail,  color:'#10b981', label:'Available'},
+    {val:rented, color:'#3b82f6', label:'Rented'},
+    {val:sold,   color:'#64748b', label:'Sold'},
+  ];
+  var pct=total>0?Math.round(avail/total*100):0;
+  var svgArcs=svgDonut(slices,60,60,45,18);
+  var html='<div class="chart-card-title">Fleet Status</div>'
+    +'<div class="donut-wrap">'
+    +'<div style="flex-shrink:0;">'
+    +'<svg width="120" height="120" viewBox="0 0 120 120">'
+    +svgArcs
+    +'<foreignObject x="20" y="40" width="80" height="40">'
+    +'<div xmlns="http://www.w3.org/1999/xhtml" class="donut-center">'
+    +'<div class="donut-center-val">'+pct+'%</div>'
+    +'<div class="donut-center-lbl">Avail</div>'
+    +'</div></foreignObject></svg>'
+    +'</div>'
+    +'<div class="donut-legend">'
+    +'<div class="dl-row"><span class="dl-swatch" style="background:#10b981"></span>Available<strong>'+avail+'</strong></div>'
+    +'<div class="dl-row"><span class="dl-swatch" style="background:#3b82f6"></span>Rented<strong>'+rented+'</strong></div>'
+    +'<div class="dl-row"><span class="dl-swatch" style="background:#64748b"></span>Sold<strong>'+sold+'</strong></div>'
+    +'<div class="dl-row" style="margin-top:4px;border-top:1px solid rgba(255,255,255,.06);padding-top:6px;">Total<strong>'+total+'</strong></div>'
+    +'</div></div>';
+  return html;
+}
+
+/* ── Revenue split pie ── */
+function drawRevenuePie(sellR, rentP){
+  var total=sellR+rentP;
+  var sellPct=total>0?Math.round(sellR/total*100):0;
+  var rentPct=100-sellPct;
+  var slices=[
+    {val:sellR, color:'#10b981', label:'Sales'},
+    {val:rentP, color:'#3b82f6', label:'Rental'},
+  ];
+  var svgArcs=total>0?svgDonut(slices,60,60,45,18)
+    :'<circle cx="60" cy="60" r="45" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="18"/>';
+  var html='<div class="chart-card-title">Revenue Split</div>'
+    +'<div class="donut-wrap">'
+    +'<div style="flex-shrink:0;">'
+    +'<svg width="120" height="120" viewBox="0 0 120 120">'
+    +svgArcs
+    +'<foreignObject x="20" y="38" width="80" height="44">'
+    +'<div xmlns="http://www.w3.org/1999/xhtml" class="donut-center">'
+    +'<div class="donut-center-val">'+sellPct+'%</div>'
+    +'<div class="donut-center-lbl">Sales</div>'
+    +'</div></foreignObject></svg>'
+    +'</div>'
+    +'<div class="donut-legend">'
+    +'<div class="dl-row"><span class="dl-swatch" style="background:#10b981"></span>Sales<strong>'+sellPct+'%</strong></div>'
+    +'<div class="dl-row"><span class="dl-swatch" style="background:#3b82f6"></span>Rental<strong>'+rentPct+'%</strong></div>'
+    +'<hr style="border:none;border-top:1px solid rgba(255,255,255,.06);margin:4px 0;">'
+    +'<div class="dl-row" style="font-size:10px;">Total<strong>'+rpFull(total)+'</strong></div>'
+    +'</div></div>';
+  return html;
+}
+
+/* ── Profit breakdown bar ── */
+function drawProfitBar(sellP, rentP){
+  var total=sellP+rentP;
+  var sp=total>0?Math.round(sellP/total*100):0;
+  var rp2=100-sp;
+  var html='<div class="chart-card-title">Profit Sources</div>';
+  html+='<div style="margin-bottom:12px;">'
+    +'<div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(148,163,184,.5);margin-bottom:6px;"><span>Sales Profit</span><span style="color:#34d399;font-weight:700;">'+rpFull(sellP)+'</span></div>'
+    +'<div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;">'
+    +'<div style="height:100%;width:'+sp+'%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:4px;transition:width .6s ease;"></div>'
+    +'</div></div>';
+  html+='<div style="margin-bottom:12px;">'
+    +'<div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(148,163,184,.5);margin-bottom:6px;"><span>Rental Revenue</span><span style="color:#60a5fa;font-weight:700;">'+rpFull(rentP)+'</span></div>'
+    +'<div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;">'
+    +'<div style="height:100%;width:'+rp2+'%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:4px;transition:width .6s ease;"></div>'
+    +'</div></div>';
+  html+='<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;display:flex;justify-content:space-between;align-items:baseline;">'
+    +'<span style="font-size:10px;color:rgba(148,163,184,.45);text-transform:uppercase;letter-spacing:.07em;">Net Profit</span>'
+    +'<span style="font-size:16px;font-weight:800;color:#a5b4fc;">'+rpFull(total)+'</span>'
+    +'</div>';
+  return html;
+}
+
+/* ── Metric pills ── */
+function drawMetrics(d, sellP, sellR, sellC, rentP){
+  var avgSale=parseInt(d.sell_count||0)>0?(parseFloat(sellR)/parseInt(d.sell_count)):0;
+  var margin=sellR>0?((sellP/sellR)*100).toFixed(1):0;
+  var rentCount=parseInt(d.rental_count||0);
+  var avgRental=rentCount>0?(rentP/rentCount):0;
+  var roi=sellC>0?((sellP/sellC)*100).toFixed(1):0;
+
+  var pills=[
+    {lbl:'Profit Margin',      val:margin+'%',         sub:'on completed sales'},
+    {lbl:'Avg Sale Price',     val:rpFull(avgSale),    sub:'per completed sale'},
+    {lbl:'Avg Rental Revenue', val:rpFull(avgRental),  sub:'per completed rental'},
+    {lbl:'ROI on Inventory',   val:roi+'%',             sub:'profit vs cost price'},
+  ];
+  var html='';
+  pills.forEach(function(p){
+    html+='<div class="metric-pill">'
+      +'<div class="metric-pill-lbl">'+p.lbl+'</div>'
+      +'<div class="metric-pill-val">'+p.val+'</div>'
+      +'<div class="metric-pill-sub">'+p.sub+'</div>'
+      +'</div>';
+  });
+  return html;
+}
+
+/* ── Override loadSummary to also draw charts ── */
+var _origLoadSummary = loadSummary;
+loadSummary = function(){
+  callAPI('getFinancialSummary_DASHBOARD',{}).done(function(r){
+    if(!r||!r.status) return;
+    var d=r.data;
+    var sellP=parseFloat(d.sell_profit||d.total_profit||0);
+    var rentP=parseFloat(d.rental_revenue||0);
+    var sellR=parseFloat(d.sell_revenue||0);
+    var sellC=parseFloat(d.sell_cost||0);
+    var totalP=sellP+rentP;
+    var roi=sellC>0?((sellP/sellC)*100).toFixed(1):0;
+
+    // KPI row 1
+    var row1=[
+      {cls:'kpi-profit',icon:'💰',lbl:'Net Profit',     val:rpFull(totalP), sub:rpFull(totalP),badge:null},
+      {cls:'kpi-sell',  icon:'🚗',lbl:'Sales Revenue',  val:rpFull(sellR),  sub:d.sell_count+' sales',badge:null},
+      {cls:'kpi-roi',   icon:'📈',lbl:'Sales Profit',   val:rpFull(sellP),  sub:'Margin: '+( sellR>0?((sellP/sellR)*100).toFixed(1):0 )+'%',badge:roi>0?{cls:'badge-up',txt:'ROI '+roi+'%'}:null},
+      {cls:'kpi-rent',  icon:'📅',lbl:'Rental Revenue', val:rpFull(rentP),  sub:d.rental_count+' rentals',badge:null},
+    ];
+    var h1='';
+    row1.forEach(function(c){
+      h1+='<div class="kpi '+c.cls+'">'
+        +'<span class="kpi-icon">'+c.icon+'</span>'
+        +'<div class="kpi-lbl">'+c.lbl+'</div>'
+        +'<div class="kpi-val">'+c.val+'</div>'
+        +(c.badge?'<span class="kpi-badge '+c.badge.cls+'">'+c.badge.txt+'</span>':'')
+        +'<div class="kpi-sub">'+c.sub+'</div>'
+        +'</div>';
+    });
+    $('#kpiCards').html(h1);
+
+    // KPI row 2
+    var assetTotal=parseFloat(d.asset_total||0);
+    var assetAvail=parseFloat(d.asset_available||0);
+    var assetPct=assetTotal>0?Math.round(assetAvail/assetTotal*100):0;
+    var row2=[
+      {cls:'kpi-asset', icon:'🏦',lbl:'Total Asset Value',   val:rpFull(d.asset_total),    sub:d.vehicle_count+' vehicles · book value'},
+      {cls:'kpi-avail', icon:'✅',lbl:'Available Inventory', val:rpFull(d.asset_available), sub:d.available_count+' units · '+assetPct+'% of fleet'},
+      {cls:'kpi-sold',  icon:'📦',lbl:'Sold · Rented',       val:d.sold_count+' / '+d.rented_count, sub:'Sold book: '+rpFull(d.asset_sold_book)},
+    ];
+    var h2='';
+    row2.forEach(function(c){
+      h2+='<div class="kpi '+c.cls+'">'
+        +'<span class="kpi-icon">'+c.icon+'</span>'
+        +'<div class="kpi-lbl">'+c.lbl+'</div>'
+        +'<div class="kpi-val kpi-val-sm">'+c.val+'</div>'
+        +'<div class="kpi-sub">'+c.sub+'</div>'
+        +'</div>';
+    });
+    $('#assetCards').html(h2);
+
+    // Metric pills
+    $('#metricPills').html(drawMetrics(d, sellP, sellR, sellC, rentP));
+
+    // Pie/donut charts
+    var c1=drawFleetPie(d);
+    var c2=drawRevenuePie(sellR, rentP);
+    var c3=drawProfitBar(sellP, rentP);
+    $('#chartsRow').html(
+      '<div class="chart-card">'+c1+'</div>'
+      +'<div class="chart-card">'+c2+'</div>'
+      +'<div class="chart-card">'+c3+'</div>'
+    );
+  });
+};
+
+$(document).ready(function(){
+  if(window.VDMS_CONFIG&&window.VDMS_CONFIG.role==='admin') loadAll();
+});
+</script>
+</body>
+</html>

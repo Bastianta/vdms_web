@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VDMS — Inventory</title>
+<style>
+/* Tailwind compatibility — offline safe */
+.flex{display:flex!important}.inline-flex{display:inline-flex!important}.block{display:block!important}.hidden{display:none!important}.grid{display:grid!important}
+.flex-col{flex-direction:column!important}.flex-1{flex:1 1 0%!important}.flex-shrink-0{flex-shrink:0!important}.flex-wrap{flex-wrap:wrap!important}
+.items-center{align-items:center!important}.items-start{align-items:flex-start!important}.justify-center{justify-content:center!important}.justify-between{justify-content:space-between!important}
+.gap-1{gap:.25rem!important}.gap-2{gap:.5rem!important}.gap-3{gap:.75rem!important}.gap-4{gap:1rem!important}.gap-6{gap:1.5rem!important}
+.h-screen{height:100vh!important}.min-h-screen{min-height:100vh!important}.w-full{width:100%!important}.h-full{height:100%!important}
+.overflow-hidden{overflow:hidden!important}.overflow-auto{overflow:auto!important}.overflow-y-auto{overflow-y:auto!important}.overflow-x-auto{overflow-x:auto!important}
+.min-w-0{min-width:0!important}
+.p-4{padding:1rem!important}.p-6{padding:1.5rem!important}
+.px-4{padding-left:1rem!important;padding-right:1rem!important}.px-6{padding-left:1.5rem!important;padding-right:1.5rem!important}
+.py-3{padding-top:.75rem!important;padding-bottom:.75rem!important}.py-4{padding-top:1rem!important;padding-bottom:1rem!important}
+.py-6{padding-top:1.5rem!important;padding-bottom:1.5rem!important}
+.pt-4{padding-top:1rem!important}.pt-5{padding-top:1.25rem!important}.pb-28{padding-bottom:7rem!important}
+.mt-0\.5{margin-top:.125rem!important}.mt-1{margin-top:.25rem!important}.mt-2{margin-top:.5rem!important}
+.mt-4{margin-top:1rem!important}.mt-5{margin-top:1.25rem!important}.mt-6{margin-top:1.5rem!important}
+.mb-1{margin-bottom:.25rem!important}.mb-2{margin-bottom:.5rem!important}.mb-3{margin-bottom:.75rem!important}
+.mb-4{margin-bottom:1rem!important}.mb-5{margin-bottom:1.25rem!important}.mb-6{margin-bottom:1.5rem!important}
+.ml-4{margin-left:1rem!important}.ml-auto{margin-left:auto!important}.mr-1{margin-right:.25rem!important}
+.text-xs{font-size:.75rem!important}.text-sm{font-size:.875rem!important}.text-base{font-size:1rem!important}
+.text-lg{font-size:1.125rem!important}.text-xl{font-size:1.25rem!important}.text-2xl{font-size:1.5rem!important}.text-3xl{font-size:1.875rem!important}
+.font-medium{font-weight:500!important}.font-semibold{font-weight:600!important}.font-bold{font-weight:700!important}
+.tracking-tight{letter-spacing:-.025em!important}.tracking-wider{letter-spacing:.05em!important}.uppercase{text-transform:uppercase!important}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important}
+.text-center{text-align:center!important}.text-left{text-align:left!important}
+.rounded{border-radius:.25rem!important}.rounded-lg{border-radius:.5rem!important}.rounded-xl{border-radius:.75rem!important}
+.rounded-2xl{border-radius:1rem!important}.rounded-full{border-radius:9999px!important}.rounded-3xl{border-radius:1.5rem!important}
+.border{border-width:1px!important}.border-t{border-top-width:1px!important}.border-b{border-bottom-width:1px!important}.border-l{border-left-width:1px!important}
+.border-white\/5{border-color:rgba(255,255,255,.05)!important}.border-white\/10{border-color:rgba(255,255,255,.1)!important}
+.relative{position:relative!important}.absolute{position:absolute!important}.fixed{position:fixed!important}
+.inset-0{top:0!important;right:0!important;bottom:0!important;left:0!important}
+.top-0{top:0!important}.left-0{left:0!important}.bottom-0{bottom:0!important}.right-0{right:0!important}
+.z-10{z-index:10!important}.z-50{z-index:50!important}
+.space-y-3>*+*{margin-top:.75rem!important}.space-y-4>*+*{margin-top:1rem!important}
+.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.cursor-pointer{cursor:pointer!important}.select-none{user-select:none!important}
+.transition-colors{transition-property:color,background-color,border-color;transition-duration:.15s!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0)!important}
+.-translate-y-1\/2{transform:translateY(-50%)!important}
+.translate-y-0{transform:translateY(0)!important}
+/* Text colors commonly used */
+.text-white{color:#fff!important}.text-slate-300{color:#cbd5e1!important}.text-slate-400{color:#94a3b8!important}
+.text-slate-500{color:#64748b!important}.text-slate-600{color:#475569!important}
+.text-indigo-300{color:#a5b4fc!important}.text-indigo-400{color:#818cf8!important}
+.text-emerald-300{color:#6ee7b7!important}.text-emerald-400{color:#34d399!important}
+.text-yellow-300{color:#fde047!important}.text-yellow-400{color:#facc15!important}
+.text-red-400{color:#f87171!important}.text-blue-300{color:#93c5fd!important}
+.text-purple-300{color:#d8b4fe!important}
+/* Spacing helpers */
+.w-5{width:1.25rem!important}.h-5{height:1.25rem!important}
+.w-6{width:1.5rem!important}.h-6{height:1.5rem!important}
+.w-8{width:2rem!important}.h-8{height:2rem!important}
+.w-10{width:2.5rem!important}.h-10{height:2.5rem!important}
+.w-11{width:2.75rem!important}.h-6{height:1.5rem!important}
+.w-14{width:3.5rem!important}.h-14{height:3.5rem!important}
+.w-20{width:5rem!important}.w-48{width:12rem!important}.w-56{width:14rem!important}.w-60{width:15rem!important}
+.w-72{width:18rem!important}
+.h-48{height:12rem!important}.h-52{height:13rem!important}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+* { font-family:'Inter',sans-serif; }
+body { background:#020817; color:#e2e8f0; }
+.glass { background:rgba(15,23,42,.8); border:1px solid rgba(99,102,241,.12); backdrop-filter:blur(12px); }
+.input-dark { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:#e2e8f0; border-radius:8px; padding:8px 12px; font-size:13px; transition:all .2s; }
+.input-dark:focus { outline:none; border-color:#6366f1; }
+.input-dark::placeholder { color:rgba(148,163,184,.4); }
+select.input-dark option { background:#0f172a; }
+.btn-indigo { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; }
+.btn-indigo:hover { opacity:.9; transform:translateY(-1px); }
+.btn-ghost { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:#94a3b8; border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; transition:all .2s; }
+.btn-ghost:hover { background:rgba(255,255,255,.08); color:#e2e8f0; }
+.btn-danger { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.15); color:#f87171; border-radius:8px; padding:5px 10px; font-size:11px; cursor:pointer; }
+.btn-danger:hover { background:rgba(239,68,68,.15); }
+.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:100px; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.badge-car    { background:rgba(99,102,241,.15); color:#a5b4fc; border:1px solid rgba(99,102,241,.2); }
+.badge-moto   { background:rgba(234,179,8,.12);  color:#facc15; border:1px solid rgba(234,179,8,.2); }
+.badge-avail  { background:rgba(52,211,153,.12); color:#6ee7b7; border:1px solid rgba(52,211,153,.2); }
+.badge-rented { background:rgba(59,130,246,.12); color:#93c5fd; border:1px solid rgba(59,130,246,.2); }
+.badge-sold   { background:rgba(107,114,128,.1); color:#9ca3af; border:1px solid rgba(107,114,128,.2); }
+.badge-new    { background:rgba(59,130,246,.1);  color:#93c5fd; border:1px solid rgba(59,130,246,.2); }
+.badge-used   { background:rgba(168,85,247,.1);  color:#d8b4fe; border:1px solid rgba(168,85,247,.2); }
+.badge-count  { background:rgba(255,255,255,.06); color:#94a3b8; border:1px solid rgba(255,255,255,.08); }
+.dtable { width:100%; border-collapse:collapse; }
+.dtable th { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(148,163,184,.5); padding:10px 14px; border-bottom:1px solid rgba(255,255,255,.05); text-align:left; white-space:nowrap; cursor:pointer; user-select:none; }
+.dtable th:hover { color:rgba(165,180,252,.8); }
+.dtable td { padding:11px 14px; border-bottom:1px solid rgba(255,255,255,.04); font-size:13px; vertical-align:middle; }
+.dtable .group-row { cursor:pointer; }
+.dtable .group-row:hover td { background:rgba(99,102,241,.06); }
+.dtable .unit-row { display:none; }
+.dtable .unit-row.open { display:table-row; }
+.dtable .unit-row td { background:rgba(0,0,0,.2); padding:9px 14px 9px 28px; font-size:12px; }
+.dtable .unit-row:hover td { background:rgba(99,102,241,.05); }
+.chevron { display:inline-block; transition:transform .2s; font-size:9px; margin-right:6px; color:rgba(99,102,241,.6); }
+.group-row.open .chevron { transform:rotate(90deg); }
+.sort-asc::after  { content:' ↑'; color:#a5b4fc; }
+.sort-desc::after { content:' ↓'; color:#a5b4fc; }
+/* grid */
+.gs-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#64748b;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;}
+.gs-btn:hover{color:#e2e8f0;background:rgba(255,255,255,.08);}
+.gs-btn.active{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.3);color:#a5b4fc;}
+.gs-sort-arrow{color:rgba(99,102,241,.8);font-size:10px;margin-left:2px;}
+.vcard { background:rgba(15,23,42,.85); border:1px solid rgba(99,102,241,.15); border-radius:14px; overflow:hidden; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; }
+.vcard:hover { border-color:rgba(99,102,241,.4); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.4); }
+.vcard-img { width:100%; height:150px; overflow:hidden; background:rgba(255,255,255,.04); flex-shrink:0; }
+.vcard-img img { width:100%; height:100%; object-fit:cover; display:block; }
+.vcard-body { padding:12px 14px; flex:1; }
+.vcard-actions { display:flex; gap:4px; flex-wrap:wrap; padding:8px 14px 12px; border-top:1px solid rgba(255,255,255,.05); flex-shrink:0; }
+/* modal */
+#detailModal { display:none; position:fixed; inset:0; z-index:3000; background:rgba(0,0,0,.75); backdrop-filter:blur(4px); }
+.modal-open { display:flex !important; align-items:center; justify-content:center; }
+.mcard { background:#0d1629; border:1px solid rgba(99,102,241,.2); border-radius:16px; width:680px; max-height:88vh; display:flex; flex-direction:column; }
+</style>
+</head>
+<body class="flex h-screen overflow-hidden" style="display:flex!important;height:100vh!important;overflow:hidden!important">
+<script>window.VDMS_CONFIG={role:'[USER_ROLE]',name:'[USER_NAMA]',menuId:'VEHICLE_LIST'};</script>
+[SIDEBAR]
+
+<div class="flex-1 flex flex-col overflow-hidden min-w-0" style="min-width:0">
+  <!-- Header -->
+  <header class="glass border-b border-white/5 px-6 py-4 flex items-center gap-3 flex-shrink-0">
+    <div class="flex-1">
+      <h1 class="text-lg font-bold text-white">Vehicle Inventory</h1>
+      <p class="text-xs text-slate-500 mt-0.5"><span id="lblModels">—</span> models · <span id="lblUnits">—</span> units total</p>
+    </div>
+    <!-- View toggle -->
+    <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:3px">
+      <button id="btnTable" title="Table" onclick="setView('table')" style="padding:5px 8px;border:none;border-radius:6px;cursor:pointer;background:transparent;color:#64748b;transition:all .2s">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      </button>
+      <button id="btnGrid" title="Grid" onclick="setView('grid')" style="padding:5px 8px;border:none;border-radius:6px;cursor:pointer;background:rgba(99,102,241,.3);color:#a5b4fc;transition:all .2s">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+    </div>
+    <button data-admin onclick="location.href='/?type=CUSTOM_VIEW&menuId=VEHICLE_ADD'" class="btn-indigo flex items-center gap-2">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Vehicle
+    </button>
+  </header>
+
+  <!-- Filters -->
+  <div class="px-6 py-3 flex gap-2 items-center flex-shrink-0 border-b border-white/5 flex-wrap">
+    <input id="fSearch" type="text" placeholder="Search…" class="input-dark" style="width:200px" oninput="onSearch()">
+    <select id="fBrand" class="input-dark" onchange="reload()"><option value="">All Brands</option></select>
+    <select id="fType" class="input-dark" onchange="reload()">
+      <option value="">All Types</option>
+      <option value="Car">Car</option>
+      <option value="Motorcycle">Motorcycle</option>
+    </select>
+    <select id="fStatus" class="input-dark" onchange="reload()">
+      <option value="">All Status</option>
+      <option value="available">Available</option>
+      <option value="rented">Rented</option>
+      <option value="sold">Sold</option>
+    </select>
+    <span id="expandBtns" style="display:none">
+      <button class="btn-ghost" onclick="expandAll()">Expand All</button>
+      <button class="btn-ghost" onclick="collapseAll()">Collapse All</button>
+    </span>
+    <!-- Grid sort strip — shown when in grid mode -->
+    <span id="gridSortStrip" style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:10px;color:rgba(148,163,184,.4);font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Sort:</span>
+      <button class="gs-btn active" id="gsBrand"  onclick="setGridSort('brand')">Brand ↑</button>
+      <button class="gs-btn"        id="gsPrice"  onclick="setGridSort('price')">Price</button>
+      <button class="gs-btn"        id="gsCond"   onclick="setGridSort('condition')">Condition</button>
+      <button class="gs-btn"        id="gsStatus" onclick="setGridSort('status')">Status</button>
+    </span>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <span style="font-size:11px;color:rgba(148,163,184,.4);font-weight:600;text-transform:uppercase">Sort:</span>
+      <button id="bPrice" class="btn-ghost" style="font-size:11px;padding:5px 10px" onclick="doSort('price')">Price ↕</button>
+      <button id="bCond"  class="btn-ghost" style="font-size:11px;padding:5px 10px" onclick="doSort('condition')">Condition ↕</button>
+      <button class="btn-ghost" style="font-size:11px;padding:5px 10px;color:#f87171" onclick="clearSort()">Clear Sort</button>
+    </div>
+  </div>
+
+  <!-- Table view -->
+  <div id="tableView" class="flex-1 overflow-auto px-6 py-4" style="display:none;min-width:0">
+    <div class="glass rounded-xl overflow-hidden">
+      <table class="dtable">
+        <thead><tr>
+          <th style="width:48px"></th>
+          <th>Model</th>
+          <th id="hType"   onclick="doSort('type')">Type</th>
+          <th id="hUnits">Units</th>
+          <th id="hAvail"  onclick="doSort('status')">Availability</th>
+          <th id="hCond"   onclick="doSort('condition')" style="display:none">Condition</th>
+          <th id="hPrice"  onclick="doSort('price')"     style="display:none">Price</th>
+          <th id="hStatus"                               style="display:none">Status</th>
+          <th data-admin>Actions</th>
+        </tr></thead>
+        <tbody id="tBody"><tr><td colspan="9" style="text-align:center;padding:48px;color:rgba(148,163,184,.4)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+      <span id="tInfo" style="font-size:13px;color:rgba(148,163,184,.5)"></span>
+      <div id="tPager" style="display:flex;align-items:center;gap:6px"></div>
+    </div>
+  </div>
+
+  <!-- Grid view -->
+  <div id="gridView" class="flex-1 overflow-auto px-6 py-4" style="display:block;min-width:0">
+    <div id="gBody" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;align-items:start"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+      <span id="gInfo" style="font-size:13px;color:rgba(148,163,184,.5)"></span>
+      <div id="gPager" style="display:flex;align-items:center;gap:6px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detailModal">
+  <div class="mcard">
+    <div class="px-6 py-4 border-b border-white/5 flex items-start justify-between flex-shrink-0">
+      <div><h2 id="mTitle" class="text-base font-bold text-white">—</h2><div id="mBadge" class="mt-1"></div></div>
+      <button onclick="closeModal()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#94a3b8;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;padding:0;' onmouseenter='this.style.background='rgba(239,68,68,.15)';this.style.borderColor='rgba(239,68,68,.3)';this.style.color='#f87171';' onmouseleave='this.style.background='rgba(255,255,255,.06)';this.style.borderColor='rgba(255,255,255,.1)';this.style.color='#94a3b8';' onmousedown='this.style.transform='scale(.91)'' onmouseup='this.style.transform='scale(1)''><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="overflow-y-auto p-6">
+      <div style="width:100%;height:180px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:12px;display:flex;align-items:center;justify-content:center">
+        <img id="mImg" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:none">
+        <span id="mNoImg" class="text-slate-600 text-sm">No photo</span>
+      </div>
+      <div id="mThumbs" class="flex gap-2 overflow-x-auto mb-4"></div>
+      <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm mb-4">
+        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Type</p><p id="mType" class="font-medium text-white">—</p></div>
+        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Brand</p><p id="mBrand" class="font-medium text-white">—</p></div>
+        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Model</p><p id="mName" class="font-medium text-white">—</p></div>
+        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Trim</p><p id="mTrim" class="font-medium text-white">—</p></div>
+        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Year</p><p id="mYear" class="font-medium text-white">—</p></div>
+        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Price</p><p id="mPrice" class="font-bold text-indigo-300 text-base">—</p></div>
+        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Condition</p><p id="mCond" class="font-medium text-white">—</p></div>
+        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Mileage</p><p id="mMile" class="font-medium text-white">—</p></div>
+      </div>
+      <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Notes</p><p id="mNotes" class="text-slate-300 text-sm" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px">—</p></div>
+      <div data-admin class="flex gap-3 mt-5 pt-4 border-t border-white/5">
+        <button class="btn-ghost flex-1" onclick="location.href='/?type=CUSTOM_VIEW&menuId=VEHICLE_ADD&id='+window._mid">Edit</button>
+        <button class="btn-ghost flex-1" style="color:#93c5fd" onclick="location.href='/?type=CUSTOM_VIEW&menuId=RENTAL'">Rent Out</button>
+        <button class="btn-ghost flex-1" style="color:#6ee7b7" onclick="location.href='/?type=CUSTOM_VIEW&menuId=PURCHASE'">Sell</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var menuId='VEHICLE_LIST';
+var viewMode='grid';
+var sortCol='', sortDir='asc';
+var curPage=1, curGridPage=1;
+var PER_PAGE=8, GRID_PER=18;
+var openGroups={};
+var searchTimer=null;
+var isAdmin=(window.VDMS_CONFIG&&window.VDMS_CONFIG.role==='admin');
+window._mid=null;
+
+/* ── helpers ── */
+function api(fn,data){
+  return $.ajax({url:'/',type:'POST',contentType:'application/json',
+    data:JSON.stringify({type:'API',menuId:menuId,data:data||{},apiName:fn}),dataType:'json'})
+  .then(function(r){return r;},function(){return {status:false,data:{},msg:'Network error'};});
+}
+function rp(v){
+  var n=Math.round(parseFloat(String(v||'0').replace(/[^0-9.]/g,''))||0);
+  return 'Rp\u00a0'+n.toLocaleString('id-ID');
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function badge(type){
+  var m={available:'badge-avail',rented:'badge-rented',sold:'badge-sold',
+         Car:'badge-car',Motorcycle:'badge-moto',
+         'true':'badge-new','false':'badge-used'};
+  var cls=m[type]||'badge-sold';
+  var lbl={available:'AVAILABLE',rented:'RENTED',sold:'SOLD',
+           Car:'CAR',Motorcycle:'MOTO','true':'NEW','false':'USED'}[type]||type;
+  return '<span class="badge '+cls+'">'+lbl+'</span>';
+}
+function applyRole(){
+  if(!isAdmin){
+    document.querySelectorAll('[data-admin]').forEach(function(e){
+      e.style.setProperty('display','none','important');
+    });
+  }
+}
+</script>
+
+<script>
+/* ── filters / sort ── */
+function getFilters(){
+  return {
+    search:$('#fSearch').val(),
+    brand:$('#fBrand').val(),
+    type:$('#fType').val(),
+    availability:$('#fStatus').val(),
+    sortcol:sortCol, sortdir:sortDir
+  };
+}
+
+function onSearch(){clearTimeout(searchTimer);searchTimer=setTimeout(function(){curPage=1;curGridPage=1;reload();},300);}
+
+function reload(){
+  curPage=1; curGridPage=1;
+  if(viewMode==='grid') loadGrid(); else loadTable();
+}
+
+function doSort(col){
+  if(sortCol===col){sortDir=sortDir==='asc'?'desc':'asc';}
+  else{sortCol=col;sortDir='asc';}
+  // keep gridSortCol in sync
+  gridSortCol=col; gridSortDir=sortDir;
+  updateSortUI();
+  curPage=1; curGridPage=1;
+  if(viewMode==='grid') loadGrid(); else loadTable();
+}
+
+function clearSort(){
+  sortCol=''; sortDir='asc';
+  gridSortCol='brand'; gridSortDir='asc';
+  updateSortUI();
+  // reset grid strip buttons
+  ['gsBrand','gsPrice','gsCond','gsStatus'].forEach(function(id){
+    var btn=document.getElementById(id);
+    var labels={gsBrand:'Brand ↑',gsPrice:'Price',gsCond:'Condition',gsStatus:'Status'};
+    if(btn){btn.className=id==='gsBrand'?'gs-btn active':'gs-btn';btn.textContent=labels[id]||id;}
+  });
+  curPage=1; curGridPage=1;
+  if(viewMode==='grid') loadGrid(); else loadTable();
+}
+
+function updateSortUI(){
+  ['hType','hAvail','hCond','hPrice'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){el.className=el.className.replace(/ sort-asc| sort-desc/g,'');}
+  });
+  var map={type:'hType',status:'hAvail',condition:'hCond',price:'hPrice'};
+  if(sortCol&&map[sortCol]){
+    var el=document.getElementById(map[sortCol]);
+    if(el) el.className+=' sort-'+sortDir;
+  }
+  ['bPrice','bCond'].forEach(function(id){
+    var btn=document.getElementById(id);
+    if(!btn)return;
+    var bc=id==='bPrice'?'price':'condition';
+    if(sortCol===bc){
+      btn.style.color='#a5b4fc';btn.style.background='rgba(99,102,241,.15)';btn.style.border='1px solid rgba(99,102,241,.3)';
+      btn.textContent=(bc==='price'?'Price':'Condition')+(sortDir==='asc'?' ↑':' ↓');
+    }else{
+      btn.style.color='';btn.style.background='';btn.style.border='';
+      btn.textContent=(bc==='price'?'Price ↕':'Condition ↕');
+    }
+  });
+  // flat mode: toggle column visibility
+  var isFlat=(sortCol==='price'||sortCol==='condition');
+  document.getElementById('hUnits').style.display=isFlat?'none':'';
+  document.getElementById('hAvail').style.display=isFlat?'none':'';
+  document.getElementById('hCond').style.display=isFlat?'':'none';
+  document.getElementById('hPrice').style.display=isFlat?'':'none';
+  document.getElementById('hStatus').style.display=isFlat?'':'none';
+}
+</script>
+
+<script>
+/* ── view toggle ── */
+var gridSortCol='brand', gridSortDir='asc';
+
+function setGridSort(col){
+  if(gridSortCol===col){ gridSortDir=gridSortDir==='asc'?'desc':'asc'; }
+  else { gridSortCol=col; gridSortDir='asc'; }
+  // keep main sortCol in sync so filter bar buttons reflect state
+  sortCol=col; sortDir=gridSortDir;
+  // update grid strip buttons
+  var labels={brand:'Brand',price:'Price',condition:'Condition',status:'Status'};
+  ['gsBrand','gsPrice','gsCond','gsStatus'].forEach(function(id){
+    var btn=document.getElementById(id);
+    if(!btn) return;
+    var btnCol={gsBrand:'brand',gsPrice:'price',gsCond:'condition',gsStatus:'status'}[id];
+    if(btnCol===col){
+      btn.className='gs-btn active';
+      btn.textContent=(labels[col]||col)+(gridSortDir==='asc'?' ↑':' ↓');
+    } else {
+      btn.className='gs-btn';
+      btn.textContent=labels[btnCol]||btnCol;
+    }
+  });
+  // also update the filter bar sort buttons
+  ['bPrice','bCond'].forEach(function(id){
+    var btn=document.getElementById(id);
+    if(!btn)return;
+    var bc=id==='bPrice'?'price':'condition';
+    if(bc===col){
+      btn.style.color='#a5b4fc';btn.style.background='rgba(99,102,241,.15)';btn.style.border='1px solid rgba(99,102,241,.3)';
+      btn.textContent=(bc==='price'?'Price':'Condition')+(gridSortDir==='asc'?' ↑':' ↓');
+    }else{
+      btn.style.color='';btn.style.background='';btn.style.border='';
+      btn.textContent=(bc==='price'?'Price ↕':'Condition ↕');
+    }
+  });
+  loadGrid(1);
+}
+
+function setView(mode){
+  viewMode=mode;
+  document.getElementById('tableView').style.display=mode==='table'?'block':'none';
+  document.getElementById('gridView').style.display=mode==='grid'?'block':'none';
+  document.getElementById('expandBtns').style.display=mode==='table'?'inline-flex':'none';
+  document.getElementById('gridSortStrip').style.display=mode==='grid'?'flex':'none';
+  var tb=document.getElementById('btnTable'),gb=document.getElementById('btnGrid');
+  tb.style.background=mode==='table'?'rgba(99,102,241,.3)':'transparent';
+  tb.style.color=mode==='table'?'#a5b4fc':'#64748b';
+  gb.style.background=mode==='grid'?'rgba(99,102,241,.3)':'transparent';
+  gb.style.color=mode==='grid'?'#a5b4fc':'#64748b';
+  curPage=1; curGridPage=1;
+  if(mode==='grid') loadGrid(); else loadTable();
+}
+
+/* ── load table ── */
+function loadTable(page){
+  if(page) curPage=page;
+  var f=getFilters();
+  f.page=curPage;
+  $('#tBody').html('<tr><td colspan="9" style="text-align:center;padding:48px;color:rgba(148,163,184,.4)">Loading…</td></tr>');
+  api('getGroupedVehicles_VEHICLE_LIST',f).done(function(r){
+    if(!r||!r.status){
+      $('#tBody').html('<tr><td colspan="9" style="text-align:center;padding:48px;color:#f87171">'+(r?esc(r.msg):'Error')+'</td></tr>');
+      return;
+    }
+    $('#lblModels').text(r.data.total_models||'0');
+    $('#lblUnits').text(r.data.total_units||'0');
+    var isFlat=(sortCol==='price'||sortCol==='condition');
+    var html='';
+    if(isFlat){
+      var units=r.data.units||[];
+      units.forEach(function(u){
+        var lbl=esc(u._grouplabel||(u.vehiclebrand+' '+u.vehiclename+' '+u.vehicletrim));
+        var ml=u.vehiclemileage&&u.vehiclemileage!=='0'?parseInt(u.vehiclemileage).toLocaleString('id-ID')+' km':'0 km';
+        var img=u._firstimage||u.firstimage||'';
+        var ph=img?'<img src="'+esc(img)+'" style="width:36px;height:36px;object-fit:cover;border-radius:6px" onerror="this.style.display=\'none\'">':'<div style="width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,.05)"></div>';
+        var act=isAdmin?'<div style="display:flex;gap:4px"><button class="btn-ghost" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=VEHICLE_ADD&id='+u.vehicleid+'\'">Edit</button>'+(u.vehiclestatus==='available'?'<button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:#93c5fd" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=RENTAL\'">Rent</button><button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:#6ee7b7" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=PURCHASE\'">Sell</button>':'')+'<button class="btn-danger" onclick="event.stopPropagation();delV(\''+u.vehicleid+'\',\''+lbl+'\')">Del</button></div>':'';
+        html+='<tr style="cursor:pointer" onclick="openModal(\''+u.vehicleid+'\')" onmouseenter="this.querySelector(\'td\').parentElement.querySelectorAll(\'td\').forEach(function(x){x.style.background=\'rgba(99,102,241,.05)\'})" onmouseleave="this.querySelectorAll(\'td\').forEach(function(x){x.style.background=\'\'})">'
+          +'<td>'+ph+'</td><td><div style="font-weight:600;color:#e2e8f0;font-size:13px">'+lbl+'</div><div style="font-size:11px;color:rgba(148,163,184,.5)">'+esc(u.vehicleyear)+' · '+ml+'</div></td>'
+          +'<td>'+badge(u.vehicletype)+'</td>'
+          +'<td>'+badge(u.vehicleisnew)+'</td>'
+          +'<td style="font-weight:700;color:#e2e8f0">'+rp(u.vehicleprice)+'</td>'
+          +'<td>'+badge(u.vehiclestatus)+'</td>'
+          +'<td data-admin>'+act+'</td></tr>';
+      });
+      renderPager('t',curPage,r.data.total_units,r.data.per_page,'loadTable');
+      $('#tInfo').text('Showing '+(((curPage-1)*r.data.per_page)+1)+'–'+Math.min(curPage*r.data.per_page,r.data.total_units)+' of '+r.data.total_units+' units');
+    } else {
+      var groups=r.data.groups||[];
+      groups.forEach(function(g,i){html+=buildGroupHTML(g,i);});
+      renderPager('t',curPage,r.data.total_models,r.data.per_page,'loadTable');
+      $('#tInfo').text(r.data.total_models+' models, '+r.data.total_units+' units');
+    }
+    $('#tBody').html(html||'<tr><td colspan="9" style="text-align:center;padding:48px;color:rgba(148,163,184,.4)">No vehicles found</td></tr>');
+    applyRole();
+  });
+}
+</script>
+
+<script>
+function buildGroupHTML(g,i){
+  var isOpen=!!openGroups[i];
+  var img=g.firstimage?'<div style="width:36px;height:36px;border-radius:6px;overflow:hidden"><img src="'+esc(g.firstimage)+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'"></div>':'<div style="width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,.05)"></div>';
+  var pills='';
+  if(g.count_available>0) pills+='<span class="badge badge-avail" style="margin-right:3px">'+g.count_available+' avail</span>';
+  if(g.count_rented>0)    pills+='<span class="badge badge-rented" style="margin-right:3px">'+g.count_rented+' rented</span>';
+  if(g.count_sold>0)      pills+='<span class="badge badge-sold">'+g.count_sold+' sold</span>';
+  var act=isAdmin?'<button class="btn-ghost" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();addUnit(\''+esc(g.vehiclebrand)+'\',\''+esc(g.vehiclename)+'\',\''+esc(g.vehicletrim)+'\',\''+esc(g.vehicletype)+'\')">+ Unit</button>':'';
+  var html='<tr class="group-row'+(isOpen?' open':'')+'" onclick="toggleGroup('+i+',this)">'
+    +'<td>'+img+'</td>'
+    +'<td><span class="chevron">&#9654;</span><strong style="color:#e2e8f0">'+esc(g.vehiclebrand+' '+g.vehiclename)+'</strong><span style="font-size:11px;color:rgba(148,163,184,.5);margin-left:6px">'+esc(g.vehicletrim)+'</span></td>'
+    +'<td>'+badge(g.vehicletype)+'</td>'
+    +'<td><span class="badge badge-count">'+g.count_total+' unit'+(g.count_total!==1?'s':'')+'</span></td>'
+    +'<td>'+pills+'</td>'
+    +'<td style="display:none"></td><td style="display:none"></td><td style="display:none"></td>'
+    +'<td data-admin>'+act+'</td></tr>';
+  g.units.forEach(function(u,ui){
+    var ml=u.vehiclemileage&&u.vehiclemileage!=='0'?parseInt(u.vehiclemileage).toLocaleString('id-ID')+' km':'0 km';
+    var conn=ui===g.units.length-1?'└':'├';
+    var ua=isAdmin?'<div style="display:flex;gap:4px"><button class="btn-ghost" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=VEHICLE_ADD&id='+u.vehicleid+'\'">Edit</button>'+(u.vehiclestatus==='available'?'<button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:#93c5fd" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=RENTAL\'">Rent</button><button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:#6ee7b7" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=PURCHASE\'">Sell</button>':'')+'<button class="btn-danger" onclick="event.stopPropagation();delV(\''+u.vehicleid+'\',\''+esc(g.vehiclebrand+' '+g.vehiclename)+'\')">Del</button></div>':'';
+    html+='<tr class="unit-row'+(isOpen?' open':'')+'" data-gidx="'+i+'" onclick="openModal(\''+u.vehicleid+'\')">'
+      +'<td style="color:rgba(99,102,241,.4);font-family:monospace;font-size:12px">'+conn+'</td>'
+      +'<td><div style="color:#e2e8f0;font-size:12px">Unit #'+u.vehicleid+' · '+esc(u.vehicleyear)+'</div><div style="color:rgba(148,163,184,.5);font-size:11px">'+ml+'</div></td>'
+      +'<td>'+badge(u.vehicleisnew)+'</td>'
+      +'<td style="font-weight:700;color:#e2e8f0">'+rp(u.vehicleprice)+'</td>'
+      +'<td>'+badge(u.vehiclestatus)+'</td>'
+      +'<td style="display:none"></td><td style="display:none"></td><td style="display:none"></td>'
+      +'<td data-admin>'+ua+'</td></tr>';
+  });
+  return html;
+}
+
+function toggleGroup(i,row){
+  openGroups[i]=!openGroups[i];
+  var open=openGroups[i];
+  $(row).toggleClass('open',open);
+  $('[data-gidx="'+i+'"]').toggleClass('open',open);
+}
+function expandAll(){$('.group-row').addClass('open');$('.unit-row').addClass('open');Object.keys(openGroups).forEach(function(k){openGroups[k]=true;});}
+function collapseAll(){$('.group-row').removeClass('open');$('.unit-row').removeClass('open');openGroups={};}
+function addUnit(b,n,t,tp){location.href='/?type=CUSTOM_VIEW&menuId=VEHICLE_ADD&prefill_brand='+encodeURIComponent(b)+'&prefill_name='+encodeURIComponent(n)+'&prefill_trim='+encodeURIComponent(t)+'&prefill_type='+encodeURIComponent(tp);}
+</script>
+
+<script>
+/* ── grid view ── */
+function loadGrid(page){
+  if(page) curGridPage=page;
+  var f=getFilters();
+  f.page=1; f.gridmode=true;
+  $('#gBody').html('<div style="grid-column:1/-1;text-align:center;padding:48px;color:rgba(148,163,184,.4)">Loading…</div>');
+  api('getGroupedVehicles_VEHICLE_LIST',f).done(function(r){
+    if(!r||!r.status){
+      $('#gBody').html('<div style="grid-column:1/-1;text-align:center;padding:48px;color:#f87171">'+(r?esc(r.msg):'Error')+'</div>');
+      return;
+    }
+    $('#lblModels').text(r.data.total_models||'0');
+    $('#lblUnits').text(r.data.total_units||'0');
+    var allUnits=[];
+    // Handle both grouped and flat mode responses
+    if(r.data.mode==='flat'){
+      allUnits=r.data.units||[];
+      allUnits.forEach(function(u){
+        u._lbl=u._grouplabel||(u.vehiclebrand+' '+u.vehiclename+' '+u.vehicletrim);
+        u._img=u._firstimage||u.firstimage||'';
+      });
+    } else {
+      var groups=r.data.groups||[];
+      groups.forEach(function(g){
+        g.units.forEach(function(u){
+          u._lbl=g.vehiclebrand+' '+g.vehiclename+' '+g.vehicletrim;
+          u._img=g.firstimage||'';
+          allUnits.push(u);
+        });
+      });
+    }
+    // client-side sort for all sort types
+    if(sortCol==='price'){
+      allUnits.sort(function(a,b){var d=parseFloat(a.vehicleprice||0)-parseFloat(b.vehicleprice||0);return sortDir==='asc'?d:-d;});
+    } else if(sortCol==='condition'){
+      allUnits.sort(function(a,b){var av=a.vehicleisnew==='true'?0:1,bv=b.vehicleisnew==='true'?0:1;return sortDir==='asc'?(av-bv):(bv-av);});
+    } else if(sortCol==='status'){
+      var order={available:0,rented:1,sold:2};
+      allUnits.sort(function(a,b){var av=order[a.vehiclestatus]||0,bv=order[b.vehiclestatus]||0;return sortDir==='asc'?(av-bv):(bv-av);});
+    } else if(sortCol==='type'){
+      allUnits.sort(function(a,b){var av=a.vehicletype||'',bv=b.vehicletype||'';return sortDir==='asc'?av.localeCompare(bv):bv.localeCompare(av);});
+    } else {
+      // default: brand A-Z (gridSortCol='brand')
+      allUnits.sort(function(a,b){
+        var al=(a._lbl||a._grouplabel||'').toLowerCase();
+        var bl=(b._lbl||b._grouplabel||'').toLowerCase();
+        return sortDir==='asc'?al.localeCompare(bl):bl.localeCompare(al);
+      });
+    }
+    var total=allUnits.length;
+    var offset=(curGridPage-1)*GRID_PER;
+    var slice=allUnits.slice(offset,offset+GRID_PER);
+    if(!slice.length){$('#gBody').html('<div style="grid-column:1/-1;text-align:center;padding:48px;color:rgba(148,163,184,.4)">No vehicles found</div>');return;}
+    var html='';
+    slice.forEach(function(u){
+      var img=u._img?'<img src="'+esc(u._img)+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display=\'none\'">':'';
+      var ml=u.vehiclemileage&&u.vehiclemileage!=='0'?parseInt(u.vehiclemileage).toLocaleString('id-ID')+' km':'0 km';
+      var acts='';
+      if(isAdmin){
+        acts='<div class="vcard-actions"><button class="btn-ghost" style="font-size:11px;padding:3px 8px;flex:1" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=VEHICLE_ADD&id='+u.vehicleid+'\'">Edit</button>';
+        if(u.vehiclestatus==='available'){acts+='<button class="btn-ghost" style="font-size:11px;padding:3px 8px;flex:1;color:#93c5fd" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=RENTAL\'">Rent</button><button class="btn-ghost" style="font-size:11px;padding:3px 8px;flex:1;color:#6ee7b7" onclick="event.stopPropagation();location.href=\'/?type=CUSTOM_VIEW&menuId=PURCHASE\'">Sell</button>';}
+        acts+='</div>';
+      }
+      var cp=parseFloat(u.vehiclecostprice||0);
+      html+='<div class="vcard" onclick="openModal(\''+u.vehicleid+'\')"><div class="vcard-img">'+img+'</div>'
+        +'<div class="vcard-body"><div style="font-weight:700;color:#e2e8f0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u._lbl)+'</div>'
+        +'<div style="font-size:11px;color:rgba(148,163,184,.5);margin-top:2px">'+esc(u.vehicleyear)+' · '+ml+'</div>'
+        +'<div style="font-weight:700;color:#a5b4fc;font-size:14px;margin-top:6px">'+rp(u.vehicleprice)+'</div>'
+        +(isAdmin&&cp>0?'<div style="font-size:11px;color:rgba(251,191,36,.7);margin-top:2px">Cost: '+rp(cp)+'</div>':'')
+        +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">'+badge(u.vehicletype)+badge(u.vehicleisnew)+badge(u.vehiclestatus)+'</div></div>'+acts+'</div>';
+    });
+    $('#gBody').html(html);
+    renderPager('g',curGridPage,total,GRID_PER,'loadGrid');
+    $('#gInfo').text('Showing '+(offset+1)+'–'+Math.min(offset+GRID_PER,total)+' of '+total+' units');
+    applyRole();
+  });
+}
+</script>
+
+<script>
+/* ── pagination ── */
+function renderPager(pfx,page,total,per,fn){
+  var tp=Math.ceil(total/per)||1;
+  if(tp<=1){$('#'+pfx+'Pager').html('');return;}
+  var h='';
+  h+='<button class="btn-ghost" style="padding:5px 12px;font-size:12px;opacity:'+(page<=1?'.35':'1')+'"'+(page>1?' onclick="'+fn+'('+(page-1)+')"':'')+'>‹ Prev</button>';
+  var s=Math.max(1,page-2),e=Math.min(tp,page+2);
+  if(s>1) h+='<button class="btn-ghost" style="padding:5px 10px;font-size:12px" onclick="'+fn+'(1)">1</button>'+(s>2?'<span style="color:rgba(148,163,184,.3);padding:0 3px">…</span>':'');
+  for(var i=s;i<=e;i++){var a=i===page?';background:rgba(99,102,241,.3);color:#a5b4fc;border-color:rgba(99,102,241,.4)':'';h+='<button class="btn-ghost" style="padding:5px 10px;font-size:12px;min-width:32px'+a+'" onclick="'+fn+'('+i+')">'+i+'</button>';}
+  if(e<tp) h+=(e<tp-1?'<span style="color:rgba(148,163,184,.3);padding:0 3px">…</span>':'')+'<button class="btn-ghost" style="padding:5px 10px;font-size:12px" onclick="'+fn+'('+tp+')">'+tp+'</button>';
+  h+='<button class="btn-ghost" style="padding:5px 12px;font-size:12px;opacity:'+(page>=tp?'.35':'1')+'"'+(page<tp?' onclick="'+fn+'('+(page+1)+')"':'')+'>Next ›</button>';
+  $('#'+pfx+'Pager').html(h);
+}
+
+/* ── detail modal ── */
+window._mid=null;
+function openModal(id){
+  window._mid=id;
+  api('getVehicleDetail_VEHICLE_LIST',{vehicle_id:id}).done(function(r){
+    if(!r||!r.status){Swal.fire({icon:'error',title:'Error',text:r?r.msg:'Error',background:'#0f172a',color:'#e2e8f0',confirmButtonColor:'#6366f1'});return;}
+    var v=r.data.vehicle,imgs=r.data.images||[];
+    document.getElementById('mTitle').textContent=[v.vehiclebrand,v.vehiclename,v.vehicletrim,v.vehicleyear].filter(Boolean).join(' ');
+    document.getElementById('mBadge').innerHTML=badge(v.vehiclestatus);
+    document.getElementById('mType').textContent=v.vehicletype||'—';
+    document.getElementById('mBrand').textContent=v.vehiclebrand||'—';
+    document.getElementById('mName').textContent=v.vehiclename||'—';
+    document.getElementById('mTrim').textContent=v.vehicletrim||'—';
+    document.getElementById('mYear').textContent=v.vehicleyear||'—';
+    document.getElementById('mPrice').textContent=rp(v.vehicleprice);
+    document.getElementById('mCond').textContent=v.vehicleisnew==='true'?'New':'Used';
+    document.getElementById('mMile').textContent=v.vehiclemileage&&v.vehiclemileage!=='0'?parseInt(v.vehiclemileage).toLocaleString('id-ID')+' km':'0 km';
+    document.getElementById('mNotes').textContent=v.vehiclecondition||'—';
+    var allImgs=imgs.length?imgs.map(function(i){return i.imagepath;}):(v.vehicleimagepath?[v.vehicleimagepath]:[]);
+    var mi=document.getElementById('mImg'),ni=document.getElementById('mNoImg'),td=document.getElementById('mThumbs');
+    td.innerHTML='';
+    if(allImgs.length){mi.src=allImgs[0];mi.style.display='block';ni.style.display='none';
+      allImgs.forEach(function(src,idx){var t=document.createElement('img');t.src=src;t.style='width:56px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer;flex-shrink:0;border:2px solid '+(idx===0?'#6366f1':'transparent');t.onclick=(function(s,el){return function(){mi.src=s;td.querySelectorAll('img').forEach(function(x){x.style.borderColor='transparent';});el.style.borderColor='#6366f1';};})(src,t);td.appendChild(t);});
+    }else{mi.style.display='none';ni.style.display='';}
+    $('#detailModal').addClass('modal-open'); applyRole();
+  });
+}
+function closeModal(){$('#detailModal').removeClass('modal-open');}
+$('#detailModal').on('click',function(e){if(e.target===this)closeModal();});
+
+/* ── delete ── */
+function delV(id,title){
+  Swal.fire({title:'Remove "'+title+'"?',text:'This removes the vehicle from inventory.',icon:'warning',showCancelButton:true,confirmButtonText:'Remove',confirmButtonColor:'#ef4444',background:'#0f172a',color:'#e2e8f0'})
+  .then(function(res){
+    if(!res.isConfirmed)return;
+    api('deleteVehicle_VEHICLE_LIST',{vehicleid:id}).done(function(r){
+      if(r&&r.status){Swal.fire({icon:'success',title:'Removed',timer:1200,showConfirmButton:false,background:'#0f172a',color:'#e2e8f0'}).then(function(){if(viewMode==='grid')loadGrid();else loadTable();});}
+      else Swal.fire({icon:'error',title:'Error',text:r?r.msg:'Error',background:'#0f172a',color:'#e2e8f0',confirmButtonColor:'#6366f1'});
+    });
+  });
+}
+</script>
+
+<script>
+/* ── init ── */
+$(document).ready(function(){
+  isAdmin=(window.VDMS_CONFIG&&window.VDMS_CONFIG.role==='admin');
+  applyRole();
+  // load brands
+  api('getBrands_VEHICLE_LIST',{}).done(function(r){
+    if(!r||!r.status)return;
+    var sel=$('#fBrand');
+    (r.data||[]).forEach(function(b){sel.append('<option value="'+esc(b.vehiclebrand)+'">'+esc(b.vehiclebrand)+'</option>');});
+  });
+  // start in grid view
+  setView('grid');
+});
+</script>
+</body>
+</html>
