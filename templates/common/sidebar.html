@@ -122,12 +122,16 @@
         #vdms-sidebar-spacer { display:none!important; width:0!important; min-width:0!important; }
         #sb-overlay { display:none; position:fixed; inset:0; background:rgba(2,8,23,.65); backdrop-filter:blur(2px); z-index:4999; }
         #sb-overlay.visible { display:block; }
+        /* Hamburger shows inline in header */
         #sb-hamburger { display:flex!important; }
         #sb-hamburger.active .hb-line-1 { transform:translateY(5px) rotate(45deg); }
         #sb-hamburger.active .hb-line-2 { opacity:0; transform:scaleX(0); }
         #sb-hamburger.active .hb-line-3 { transform:translateY(-5px) rotate(-45deg); }
-        header,.topbar { padding-left:58px!important; }
+        /* Filter button inline in header */
+        #mobileFilterBtn { display:flex!important; }
         #mobileBottomNav { display:flex!important; }
+        /* No more padding-left hack since hamburger is inline */
+        header,.topbar { padding-left:16px!important; }
     }
     @media (min-width: 769px) {
         #sb-hamburger { display:none!important; }
@@ -149,15 +153,14 @@
     .mbn-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; transition:background .2s; }
     .mbn-item.active .mbn-icon { background:rgba(99,102,241,.2); }
     /* Filter FAB */
+    /* Filter button — inline in header on mobile */
     #mobileFilterBtn {
-        display:none; position:fixed; bottom:74px; right:16px; z-index:2500;
-        background:linear-gradient(135deg,#6366f1,#8b5cf6); border:none;
-        border-radius:50%; width:50px; height:50px; color:#fff; cursor:pointer;
-        align-items:center; justify-content:center;
-        box-shadow:0 4px 20px rgba(99,102,241,.55); transition:transform .15s;
+        display:none; width:36px; height:36px; border-radius:9px;
+        border:1px solid rgba(99,102,241,.2); background:rgba(99,102,241,.08);
+        color:#a5b4fc; cursor:pointer; align-items:center; justify-content:center;
+        padding:0; flex-shrink:0; transition:background .15s;
     }
-    #mobileFilterBtn:active { transform:scale(.9); }
-    @media(max-width:768px){ #mobileFilterBtn { display:flex; } }
+    #mobileFilterBtn:active { background:rgba(99,102,241,.2); }
     /* Filter panel */
     #mobileFilterOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:3999; }
     #mobileFilterOverlay.visible { display:block; }
@@ -213,29 +216,47 @@
 
     /* ══ GLOBAL MOBILE STYLES ══ */
     @media (max-width: 768px) {
-        body { padding-bottom:64px!important; }
+        body { padding-bottom:70px!important; }
+        /* Modals as bottom sheets */
         .mcard,.modal-card { width:100%!important; max-width:100%!important; max-height:92vh!important; border-radius:20px 20px 0 0!important; }
         .modal-open { align-items:flex-end!important; }
-        .glass.rounded-xl,.glass { overflow-x:auto!important; }
-        .data-table,.dtable,.tx-table { min-width:520px; font-size:12px; }
+        /* Tables scroll */
+        .glass.rounded-xl { overflow-x:auto!important; }
+        .data-table,.dtable,.tx-table { min-width:540px; font-size:12px; }
+        .data-table th,.dtable th { padding:8px 10px!important; font-size:10px!important; }
+        .data-table td,.dtable td { padding:9px 10px!important; }
+        /* Inputs full width */
         .input-dark { width:100%!important; font-size:16px!important; }
+        /* Grid view */
         #gBody { grid-template-columns:1fr 1fr!important; gap:10px!important; }
+        /* Dashboard */
         .kpi-grid { grid-template-columns:repeat(2,1fr)!important; gap:10px!important; }
         #assetCards { grid-template-columns:repeat(2,1fr)!important; }
         .content-grid { grid-template-columns:1fr!important; }
         .charts-row { grid-template-columns:1fr!important; }
+        /* Forms */
         .grid2 { grid-template-columns:1fr!important; }
+        /* VEHICLE_ADD footer */
         #footerBar { left:0!important; padding:12px 16px!important; }
+        /* Sort strip */
         #gridSortStrip { flex-wrap:wrap!important; }
+        /* Card image height */
         .vcard-img { height:120px!important; }
+        /* Hide desktop filter bars */
         .desktop-filters { display:none!important; }
+        /* Header padding & button sizing */
+        .px-6 { padding-left:14px!important; padding-right:14px!important; }
+        /* Stat cards compact */
+        .stat-card { padding:10px 12px!important; }
+        /* Stats row no forced nowrap */
+        .overflow-x-auto.flex { -webkit-overflow-scrolling:touch; }
     }
     @media (max-width: 480px) {
         #gBody { grid-template-columns:1fr!important; }
         .kpi-grid { grid-template-columns:1fr!important; }
         #assetCards { grid-template-columns:1fr!important; }
-        .kpi { padding:14px 16px!important; }
-        .kpi-val { font-size:16px!important; }
+        .kpi { padding:12px 14px!important; }
+        .kpi-val { font-size:15px!important; }
     }
 
     /* ── User section ── */
@@ -272,16 +293,15 @@
 <!-- Mobile sidebar overlay -->
 <div id="sb-overlay" onclick="closeSidebar()"></div>
 <!-- Hamburger button -->
+<!-- Hamburger injected into header on mobile via CSS display -->
 <button id="sb-hamburger" onclick="toggleSidebar()"
-  style="display:none;position:fixed;top:12px;left:12px;z-index:6000;
-         width:38px;height:38px;border-radius:10px;border:1px solid rgba(99,102,241,.3);
-         background:rgba(6,12,26,.95);color:#a5b4fc;cursor:pointer;
-         align-items:center;justify-content:center;padding:0;backdrop-filter:blur(8px);">
-  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round">
-    <line x1="3" y1="6" x2="21" y2="6"/>
-    <line x1="3" y1="12" x2="21" y2="12"/>
-    <line x1="3" y1="18" x2="21" y2="18"/>
-  </svg>
+  style="display:none;width:36px;height:36px;border-radius:9px;
+         border:1px solid rgba(99,102,241,.2);background:rgba(99,102,241,.08);
+         cursor:pointer;flex-direction:column;align-items:center;justify-content:center;
+         gap:5px;padding:0;flex-shrink:0;">
+  <span class="hb-line hb-line-1"></span>
+  <span class="hb-line hb-line-2"></span>
+  <span class="hb-line hb-line-3"></span>
 </button>
 
 <div id="vdms-sidebar-spacer" style="width:240px;min-width:240px;flex-shrink:0"></div>
