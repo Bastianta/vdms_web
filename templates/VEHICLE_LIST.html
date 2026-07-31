@@ -146,8 +146,8 @@ select.input-dark option { background:#0f172a; }
     </button>
   </header>
 
-  <!-- Filters -->
-  <div class="px-6 py-3 flex gap-2 items-center flex-shrink-0 border-b border-white/5 flex-wrap">
+  <!-- Filters (desktop) -->
+  <div class="desktop-filters px-6 py-3 flex gap-2 items-center flex-shrink-0 border-b border-white/5 flex-wrap">
     <input id="fSearch" type="text" placeholder="Search…" class="input-dark" style="width:200px" oninput="onSearch()">
     <select id="fBrand" class="input-dark" onchange="reload()"><option value="">All Brands</option></select>
     <select id="fType" class="input-dark" onchange="reload()">
@@ -658,6 +658,35 @@ $(document).ready(function(){
   // start in grid view
   setView('grid');
 });
+
+/* mobileFilterSetup — VEHICLE_LIST */
+(function(){
+  if(window.innerWidth>768) return;
+  // Mirror filter values from desktop selects (they still exist in DOM, just hidden)
+  function buildMobileFilter(){
+    var body=document.getElementById('mobileFilterBody');
+    if(!body) return;
+    body.innerHTML=
+      '<div><label class="mfp-label">Search</label><input class="mfp-input" id="mfSearch" placeholder="Brand, model…" value="'+($('#fSearch').val()||'')+'" oninput="document.getElementById('fSearch').value=this.value"></div>'
+      +'<div><label class="mfp-label">Brand</label><select class="mfp-input" id="mfBrand" onchange="document.getElementById('fBrand').value=this.value"><option value="">All Brands</option></select></div>'
+      +'<div><label class="mfp-label">Type</label><select class="mfp-input" id="mfType" onchange="document.getElementById('fType').value=this.value"><option value="">All Types</option><option value="Car">Car</option><option value="Motorcycle">Motorcycle</option></select></div>'
+      +'<div><label class="mfp-label">Status</label><select class="mfp-input" id="mfStatus" onchange="document.getElementById('fStatus').value=this.value"><option value="">All Status</option><option value="available">Available</option><option value="rented">Rented</option><option value="sold">Sold</option></select></div>'
+      +'<button class="mfp-apply" onclick="applyMobileFilter()">Apply Filters</button>';
+    // copy brand options
+    var brands=document.getElementById('fBrand');
+    var mBrands=document.getElementById('mfBrand');
+    if(brands&&mBrands){ Array.from(brands.options).forEach(function(o){ var n=document.createElement('option');n.value=o.value;n.text=o.text;mBrands.appendChild(n); }); }
+    document.getElementById('mfStatus').value=$('#fStatus').val()||'';
+    document.getElementById('mfType').value=$('#fType').val()||'';
+  }
+  function applyMobileFilter(){
+    reload();
+    closeMobileFilter();
+  }
+  window.applyMobileFilter=applyMobileFilter;
+  document.getElementById('mobileFilterBtn').addEventListener('click', buildMobileFilter);
+})();
+
 </script>
 </body>
 </html>

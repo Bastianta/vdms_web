@@ -115,36 +115,71 @@
     .role-viewer { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.2); }
 
 
-    /* ── Mobile: sidebar becomes overlay ── */
+    /* ── Mobile sidebar v2 ── */
     @media (max-width: 768px) {
-        #vdms-sidebar {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            z-index: 5000;
-            box-shadow: 4px 0 24px rgba(0,0,0,.5);
-        }
-        #vdms-sidebar.mobile-open {
-            transform: translateX(0);
-        }
-        #vdms-sidebar-spacer {
-            display: none !important;
-            width: 0 !important;
-            min-width: 0 !important;
-        }
-        #sb-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.5);
-            z-index: 4999;
-        }
-        #sb-overlay.visible { display: block; }
-        #sb-hamburger { display: flex !important; }
+        #vdms-sidebar { transform:translateX(-260px); transition:transform .28s cubic-bezier(.4,0,.2,1); z-index:5000; width:260px; min-width:260px; }
+        #vdms-sidebar.mobile-open { transform:translateX(0); box-shadow:8px 0 40px rgba(0,0,0,.6); }
+        #vdms-sidebar-spacer { display:none!important; width:0!important; min-width:0!important; }
+        #sb-overlay { display:none; position:fixed; inset:0; background:rgba(2,8,23,.65); backdrop-filter:blur(2px); z-index:4999; }
+        #sb-overlay.visible { display:block; }
+        #sb-hamburger { display:flex!important; }
+        #sb-hamburger.active .hb-line-1 { transform:translateY(5px) rotate(45deg); }
+        #sb-hamburger.active .hb-line-2 { opacity:0; transform:scaleX(0); }
+        #sb-hamburger.active .hb-line-3 { transform:translateY(-5px) rotate(-45deg); }
+        header,.topbar { padding-left:58px!important; }
+        #mobileBottomNav { display:flex!important; }
     }
     @media (min-width: 769px) {
-        #sb-hamburger { display: none !important; }
-        #sb-overlay { display: none !important; }
+        #sb-hamburger { display:none!important; }
+        #sb-overlay { display:none!important; }
+        #mobileBottomNav { display:none!important; }
+        #mobileFilterBtn { display:none!important; }
     }
+    .hb-line { display:block; width:16px; height:2px; background:#a5b4fc; border-radius:1px; transition:all .25s ease; transform-origin:center; }
+    /* Bottom nav */
+    #mobileBottomNav {
+        display:none; position:fixed; bottom:0; left:0; right:0; z-index:3000;
+        background:rgba(6,12,26,.98); border-top:1px solid rgba(99,102,241,.15);
+        backdrop-filter:blur(16px); padding:6px 0 max(6px,env(safe-area-inset-bottom));
+    }
+    .mbn-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+        text-decoration:none; color:rgba(148,163,184,.45); font-size:10px; font-weight:600;
+        letter-spacing:.03em; text-transform:uppercase; cursor:pointer; padding:4px 0; transition:color .2s; }
+    .mbn-item.active,.mbn-item:hover { color:#a5b4fc; }
+    .mbn-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; transition:background .2s; }
+    .mbn-item.active .mbn-icon { background:rgba(99,102,241,.2); }
+    /* Filter FAB */
+    #mobileFilterBtn {
+        display:none; position:fixed; bottom:74px; right:16px; z-index:2500;
+        background:linear-gradient(135deg,#6366f1,#8b5cf6); border:none;
+        border-radius:50%; width:50px; height:50px; color:#fff; cursor:pointer;
+        align-items:center; justify-content:center;
+        box-shadow:0 4px 20px rgba(99,102,241,.55); transition:transform .15s;
+    }
+    #mobileFilterBtn:active { transform:scale(.9); }
+    @media(max-width:768px){ #mobileFilterBtn { display:flex; } }
+    /* Filter panel */
+    #mobileFilterOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:3999; }
+    #mobileFilterOverlay.visible { display:block; }
+    #mobileFilterPanel {
+        position:fixed; bottom:0; left:0; right:0; z-index:4000;
+        background:#0d1629; border:1px solid rgba(99,102,241,.2);
+        border-radius:20px 20px 0 0; max-height:85vh; overflow-y:auto;
+        padding-bottom:max(24px,env(safe-area-inset-bottom));
+        transform:translateY(100%); transition:transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    #mobileFilterPanel.open { transform:translateY(0); }
+    .mfp-handle { width:36px; height:4px; background:rgba(255,255,255,.15); border-radius:2px; margin:12px auto 8px; }
+    .mfp-title { font-size:14px; font-weight:700; color:#e2e8f0; padding:8px 20px 14px;
+        border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; }
+    .mfp-body { padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
+    .mfp-label { font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:rgba(148,163,184,.55); margin-bottom:5px; display:block; }
+    .mfp-input { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+        color:#e2e8f0; border-radius:10px; padding:12px 14px; font-size:15px; width:100%; box-sizing:border-box; -webkit-appearance:none; }
+    .mfp-input:focus { outline:none; border-color:#6366f1; }
+    .mfp-apply { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border:none;
+        border-radius:12px; padding:14px; font-size:15px; font-weight:700; width:100%; cursor:pointer; margin-top:6px; }
+    .mfp-apply:active { opacity:.85; }
 
     /* ── Global SweetAlert2 dark theme ── */
     .swal2-container { z-index: 9999 !important; }
@@ -178,28 +213,29 @@
 
     /* ══ GLOBAL MOBILE STYLES ══ */
     @media (max-width: 768px) {
-        header { padding-left: 58px !important; }
-        .mcard, .modal-card {
-            width: 100% !important; max-width: 100% !important;
-            max-height: 100vh !important; border-radius: 0 !important;
-        }
-        .modal-open { align-items: flex-end !important; }
-        .glass.rounded-xl { overflow-x: auto !important; }
-        .data-table, .dtable, .tx-table { min-width: 480px; }
-        .input-dark { width: 100% !important; }
-        #gBody { grid-template-columns: 1fr 1fr !important; }
-        .kpi-grid { grid-template-columns: repeat(2,1fr) !important; }
-        #assetCards { grid-template-columns: repeat(2,1fr) !important; }
-        .content-grid { grid-template-columns: 1fr !important; }
-        .charts-row { grid-template-columns: 1fr !important; }
-        .grid2 { grid-template-columns: 1fr !important; }
-        #footerBar { left: 0 !important; }
-        #gridSortStrip { flex-wrap: wrap !important; }
+        body { padding-bottom:64px!important; }
+        .mcard,.modal-card { width:100%!important; max-width:100%!important; max-height:92vh!important; border-radius:20px 20px 0 0!important; }
+        .modal-open { align-items:flex-end!important; }
+        .glass.rounded-xl,.glass { overflow-x:auto!important; }
+        .data-table,.dtable,.tx-table { min-width:520px; font-size:12px; }
+        .input-dark { width:100%!important; font-size:16px!important; }
+        #gBody { grid-template-columns:1fr 1fr!important; gap:10px!important; }
+        .kpi-grid { grid-template-columns:repeat(2,1fr)!important; gap:10px!important; }
+        #assetCards { grid-template-columns:repeat(2,1fr)!important; }
+        .content-grid { grid-template-columns:1fr!important; }
+        .charts-row { grid-template-columns:1fr!important; }
+        .grid2 { grid-template-columns:1fr!important; }
+        #footerBar { left:0!important; padding:12px 16px!important; }
+        #gridSortStrip { flex-wrap:wrap!important; }
+        .vcard-img { height:120px!important; }
+        .desktop-filters { display:none!important; }
     }
     @media (max-width: 480px) {
-        #gBody { grid-template-columns: 1fr !important; }
-        .kpi-grid { grid-template-columns: 1fr !important; }
-        #assetCards { grid-template-columns: 1fr !important; }
+        #gBody { grid-template-columns:1fr!important; }
+        .kpi-grid { grid-template-columns:1fr!important; }
+        #assetCards { grid-template-columns:1fr!important; }
+        .kpi { padding:14px 16px!important; }
+        .kpi-val { font-size:16px!important; }
     }
 
     /* ── User section ── */
@@ -451,7 +487,47 @@ window.getRupiahValue = function(id) {
 };
 
 /* ── Mobile sidebar ── */
+/* ── Mobile sidebar & filter ── */
 function toggleSidebar(){
+    var sb=document.getElementById('vdms-sidebar'),ov=document.getElementById('sb-overlay'),hb=document.getElementById('sb-hamburger');
+    if(!sb)return;
+    var open=sb.classList.contains('mobile-open');
+    sb.classList.toggle('mobile-open',!open);
+    if(ov)ov.classList.toggle('visible',!open);
+    if(hb)hb.classList.toggle('active',!open);
+}
+function closeSidebar(){
+    var sb=document.getElementById('vdms-sidebar'),ov=document.getElementById('sb-overlay'),hb=document.getElementById('sb-hamburger');
+    if(sb)sb.classList.remove('mobile-open');
+    if(ov)ov.classList.remove('visible');
+    if(hb)hb.classList.remove('active');
+}
+document.querySelectorAll('.sb-nav-item').forEach(function(el){
+    el.addEventListener('click',function(){ if(window.innerWidth<=768) closeSidebar(); });
+});
+function openMobileFilter(){
+    var p=document.getElementById('mobileFilterPanel'),o=document.getElementById('mobileFilterOverlay');
+    if(p)p.classList.add('open'); if(o)o.classList.add('visible');
+    document.body.style.overflow='hidden';
+}
+function closeMobileFilter(){
+    var p=document.getElementById('mobileFilterPanel'),o=document.getElementById('mobileFilterOverlay');
+    if(p)p.classList.remove('open'); if(o)o.classList.remove('visible');
+    document.body.style.overflow='';
+}
+(function(){
+    var mid=(window.VDMS_CONFIG&&window.VDMS_CONFIG.menuId)||'';
+    var map={VEHICLE_LIST:'mbn-inventory',RENTAL:'mbn-rental',PURCHASE:'mbn-purchase'};
+    var el=document.getElementById(map[mid]); if(el)el.classList.add('active');
+    ['USER_MGMT','PRICE_MGMT','DASHBOARD','VEHICLE_ADD'].forEach(function(m){
+        if(m===mid){var n=document.getElementById('mobileBottomNav');if(n)n.style.display='none';}
+    });
+    ['USER_MGMT','DASHBOARD','VEHICLE_ADD'].forEach(function(m){
+        if(m===mid){var fb=document.getElementById('mobileFilterBtn');if(fb)fb.style.display='none';}
+    });
+})();
+/* ──dummy── */
+function _oldToggleSidebar(){
     var sb=document.getElementById('vdms-sidebar');
     var ov=document.getElementById('sb-overlay');
     if(!sb)return;

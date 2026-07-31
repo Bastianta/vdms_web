@@ -141,8 +141,8 @@
             </div>
         </div>
 
-        <!-- Filters -->
-        <div class="px-6 py-3 flex gap-3 flex-shrink-0 flex-wrap border-b border-white/5">
+        <!-- Filters (desktop) -->
+        <div class="desktop-filters px-6 py-3 flex gap-3 flex-shrink-0 flex-wrap border-b border-white/5">
             <input type="text" id="searchInput" placeholder="Search customer, vehicle…" class="input-dark" style="width:220px" oninput="debounceSearch()">
             <select id="statusFilter" class="input-dark" style="width:150px" onchange="loadRentals(1)">
                 <option value="">All Status</option>
@@ -432,6 +432,22 @@
     $('#detailModal').on('click',function(e){if(e.target===this)closeDetailModal();});
     if(!window.VDMS_CONFIG||window.VDMS_CONFIG.role==='viewer'){document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#f87171;font-family:Inter,sans-serif">Access denied.</div>';}
     else{loadStats();loadRentals(1);}
-    </script>
+    
+/* mobileFilterSetup — RENTAL */
+(function(){
+  if(window.innerWidth>768) return;
+  function buildMobileFilter(){
+    var body=document.getElementById('mobileFilterBody');
+    if(!body)return;
+    body.innerHTML=
+      '<div><label class="mfp-label">Search</label><input class="mfp-input" id="mfSearch" placeholder="Customer, vehicle…" value="'+($('#searchInput').val()||'')+'" oninput="document.getElementById('searchInput').value=this.value"></div>'
+      +'<div><label class="mfp-label">Status</label><select class="mfp-input" id="mfStatus" onchange="document.getElementById('statusFilter').value=this.value"><option value="">All Status</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>'
+      +'<button class="mfp-apply" onclick="loadRentals(1);closeMobileFilter();">Apply</button>';
+    document.getElementById('mfStatus').value=$('#statusFilter').val()||'';
+  }
+  document.getElementById('mobileFilterBtn').addEventListener('click', buildMobileFilter);
+})();
+
+</script>
 </body>
 </html>
