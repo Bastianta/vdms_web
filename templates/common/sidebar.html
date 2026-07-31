@@ -114,6 +114,38 @@
     .role-sales  { background: rgba(234,179,8,0.12);  color: #facc15; border: 1px solid rgba(234,179,8,0.2); }
     .role-viewer { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.2); }
 
+
+    /* ── Mobile: sidebar becomes overlay ── */
+    @media (max-width: 768px) {
+        #vdms-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 5000;
+            box-shadow: 4px 0 24px rgba(0,0,0,.5);
+        }
+        #vdms-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+        #vdms-sidebar-spacer {
+            display: none !important;
+            width: 0 !important;
+            min-width: 0 !important;
+        }
+        #sb-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 4999;
+        }
+        #sb-overlay.visible { display: block; }
+        #sb-hamburger { display: flex !important; }
+    }
+    @media (min-width: 769px) {
+        #sb-hamburger { display: none !important; }
+        #sb-overlay { display: none !important; }
+    }
+
     /* ── Global SweetAlert2 dark theme ── */
     .swal2-container { z-index: 9999 !important; }
     .swal2-popup {
@@ -142,6 +174,33 @@
     .swal2-actions { gap: 10px !important; }
     .swal2-title { font-size: 17px !important; font-weight: 700 !important; }
     .swal2-html-container { font-size: 13px !important; }
+
+
+    /* ══ GLOBAL MOBILE STYLES ══ */
+    @media (max-width: 768px) {
+        header { padding-left: 58px !important; }
+        .mcard, .modal-card {
+            width: 100% !important; max-width: 100% !important;
+            max-height: 100vh !important; border-radius: 0 !important;
+        }
+        .modal-open { align-items: flex-end !important; }
+        .glass.rounded-xl { overflow-x: auto !important; }
+        .data-table, .dtable, .tx-table { min-width: 480px; }
+        .input-dark { width: 100% !important; }
+        #gBody { grid-template-columns: 1fr 1fr !important; }
+        .kpi-grid { grid-template-columns: repeat(2,1fr) !important; }
+        #assetCards { grid-template-columns: repeat(2,1fr) !important; }
+        .content-grid { grid-template-columns: 1fr !important; }
+        .charts-row { grid-template-columns: 1fr !important; }
+        .grid2 { grid-template-columns: 1fr !important; }
+        #footerBar { left: 0 !important; }
+        #gridSortStrip { flex-wrap: wrap !important; }
+    }
+    @media (max-width: 480px) {
+        #gBody { grid-template-columns: 1fr !important; }
+        .kpi-grid { grid-template-columns: 1fr !important; }
+        #assetCards { grid-template-columns: 1fr !important; }
+    }
 
     /* ── User section ── */
     .sb-user {
@@ -172,6 +231,22 @@
     }
     .sb-logout:hover { background: rgba(239,68,68,0.15); }
 </style>
+
+
+<!-- Mobile sidebar overlay -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+<!-- Hamburger button -->
+<button id="sb-hamburger" onclick="toggleSidebar()"
+  style="display:none;position:fixed;top:12px;left:12px;z-index:6000;
+         width:38px;height:38px;border-radius:10px;border:1px solid rgba(99,102,241,.3);
+         background:rgba(6,12,26,.95);color:#a5b4fc;cursor:pointer;
+         align-items:center;justify-content:center;padding:0;backdrop-filter:blur(8px);">
+  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round">
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
 
 <div id="vdms-sidebar-spacer" style="width:240px;min-width:240px;flex-shrink:0"></div>
 
@@ -374,6 +449,26 @@ window.getRupiahValue = function(id) {
     // The input is always an integer formatted as "200.000.000" — no decimal dot
     return el.value.replace(/\./g, '').replace(/[^0-9]/g, '') || '';
 };
+
+/* ── Mobile sidebar ── */
+function toggleSidebar(){
+    var sb=document.getElementById('vdms-sidebar');
+    var ov=document.getElementById('sb-overlay');
+    if(!sb)return;
+    var open=sb.classList.contains('mobile-open');
+    sb.classList.toggle('mobile-open',!open);
+    if(ov) ov.classList.toggle('visible',!open);
+}
+function closeSidebar(){
+    var sb=document.getElementById('vdms-sidebar');
+    var ov=document.getElementById('sb-overlay');
+    if(sb) sb.classList.remove('mobile-open');
+    if(ov) ov.classList.remove('visible');
+}
+document.querySelectorAll('.sb-nav-item').forEach(function(el){
+    el.addEventListener('click',function(){ if(window.innerWidth<=768) closeSidebar(); });
+});
+
 window.setRupiahValue = function(id, val) {
     var el = document.getElementById(id);
     if (!el) return;
