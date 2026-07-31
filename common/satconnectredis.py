@@ -6,7 +6,7 @@ class DatabaseRedis:
         success = False
         result = None
         try:
-            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db)
+            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db, ssl=globalVar.REDIS_SSL)
             result = conn.hgetall(field)
             success = True
         except redis.exceptions.RedisError as err:
@@ -19,7 +19,7 @@ class DatabaseRedis:
         success = False
         result = None
         try:
-            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db)
+            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db, ssl=globalVar.REDIS_SSL)
             result = conn.hset(field, key, value)
             conn.expire(field, globalVar.TIME_EXPIRED_REDIS)
             success = True
@@ -33,7 +33,7 @@ class DatabaseRedis:
         success = False
         result = None
         try:
-            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db)
+            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db, ssl=globalVar.REDIS_SSL)
             result = conn.hget(field, key)
             success = True
         except redis.exceptions.RedisError as err:
@@ -46,7 +46,7 @@ class DatabaseRedis:
         success = False
         result = None
         try:
-            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db)
+            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db, ssl=globalVar.REDIS_SSL)
             result = conn.set(key, value)
             conn.expire(key, globalVar.TIME_EXPIRED_REDIS)
             success = True
@@ -60,7 +60,7 @@ class DatabaseRedis:
         success = False
         result = None
         try:
-            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db)
+            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db, ssl=globalVar.REDIS_SSL)
             result = conn.get(key)
             success = True
         except redis.exceptions.RedisError as err:
@@ -76,7 +76,7 @@ class DatabaseRedis:
         success = False
         result = None
         try:
-            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db)
+            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db, ssl=globalVar.REDIS_SSL)
             result = conn.exists(key)
             success = True
         except redis.exceptions.RedisError as err:
@@ -89,7 +89,7 @@ class DatabaseRedis:
         success = False
         result = None
         try:
-            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db)
+            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db, ssl=globalVar.REDIS_SSL)
             result = conn.delete(key)
             success = True
         except redis.exceptions.RedisError as err:
@@ -102,7 +102,7 @@ class DatabaseRedis:
         success = False
         result = None
         try:
-            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db)
+            conn = redis.StrictRedis(host=globalVar.HOST_REDIS, port=globalVar.PORT_REDIS, password=globalVar.PASSWORD_REDIS, db=db, ssl=globalVar.REDIS_SSL)
             result = conn.expire(key, globalVar.TIME_EXPIRED_REDIS)
             success = True
         except redis.exceptions.RedisError as err:

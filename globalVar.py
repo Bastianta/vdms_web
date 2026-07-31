@@ -57,10 +57,18 @@ else:
     print('konfigurasi globalVar.PRODUCTION tidak sesuai')
     sys.exit()
 
-# Allow a real host's managed Redis to be plugged in via env vars, e.g.:
-#   REDIS_HOST=red-xxxx.render.com  REDIS_PORT=6379  REDIS_PASSWORD=xxxx
-# Falls back to the 127.0.0.1 dev values above when unset.
 import os as _os
-HOST_REDIS = _os.environ.get("REDIS_HOST", HOST_REDIS)
-PORT_REDIS = int(_os.environ.get("REDIS_PORT", PORT_REDIS))
-PASSWORD_REDIS = _os.environ.get("REDIS_PASSWORD", PASSWORD_REDIS)
+REDIS_SSL = False
+_REDIS_URL_ENV = _os.environ.get("REDIS_URL")
+if _REDIS_URL_ENV:
+    from urllib.parse import urlparse as _urlparse
+    _parsed_redis = _urlparse(_REDIS_URL_ENV)
+    HOST_REDIS = _parsed_redis.hostname or HOST_REDIS
+    PORT_REDIS = _parsed_redis.port or PORT_REDIS
+    PASSWORD_REDIS = _parsed_redis.password or PASSWORD_REDIS
+    REDIS_SSL = (_parsed_redis.scheme == "rediss")
+else:
+    HOST_REDIS = _os.environ.get("REDIS_HOST", HOST_REDIS)
+    PORT_REDIS = int(_os.environ.get("REDIS_PORT", PORT_REDIS))
+    PASSWORD_REDIS = _os.environ.get("REDIS_PASSWORD", PASSWORD_REDIS)
+    REDIS_SSL = _os.environ.get("REDIS_SSL", "").lower() == "true"
